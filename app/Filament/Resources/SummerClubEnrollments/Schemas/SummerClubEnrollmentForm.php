@@ -26,6 +26,20 @@ class SummerClubEnrollmentForm
                         ->label('Pack')
                         ->maxLength(255),
 
+                    Forms\Components\TextInput::make('pack_key')
+                        ->label('Clé pack')
+                        ->maxLength(255),
+
+                    Forms\Components\CheckboxList::make('selected_subjects')
+                        ->label('Matières')
+                        ->options([
+                            'Français' => 'Français',
+                            'Anglais' => 'Anglais',
+                            'Mathématiques' => 'Mathématiques',
+                        ])
+                        ->columns(3)
+                        ->columnSpanFull(),
+
                     Forms\Components\Select::make('status')
                         ->label('Statut')
                         ->options([

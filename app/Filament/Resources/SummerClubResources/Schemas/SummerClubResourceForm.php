@@ -103,8 +103,18 @@ class SummerClubResourceForm
                         ->label('Verrouillé')
                         ->default(true),
 
+                    Forms\Components\Toggle::make('is_featured')
+                        ->label('Afficher sur la page Club d’été')
+                        ->helperText('Seules 4 formations mises en avant seront visibles dans le petit catalogue public.')
+                        ->default(false),
+
                     Forms\Components\TextInput::make('sort_order')
                         ->label('Ordre')
+                        ->numeric()
+                        ->default(0),
+
+                    Forms\Components\TextInput::make('featured_sort_order')
+                        ->label('Ordre mise en avant')
                         ->numeric()
                         ->default(0),
                 ]),

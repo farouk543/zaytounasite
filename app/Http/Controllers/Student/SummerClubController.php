@@ -14,7 +14,9 @@ class SummerClubController extends Controller
 {
     public function catalogue(Request $request)
     {
-        if (! $this->hasConfirmedSummerClubAccess($request)) {
+        $enrollment = $this->activeSummerClubEnrollment($request);
+
+        if (! $enrollment) {
             return view('student.summer-club.locked');
         }
 
@@ -24,6 +26,7 @@ class SummerClubController extends Controller
                 'exercises as published_exercises_count' => fn ($query) => $query->where('is_published', true),
             ])
             ->where('is_published', true)
+            ->when($this->enrollmentSubjects($enrollment), fn ($query, array $subjects) => $query->whereIn('subject', $subjects))
             ->orderBy('sort_order')
             ->get();
 
@@ -31,6 +34,12 @@ class SummerClubController extends Controller
             ->withCount('questions')
             ->with('resource')
             ->where('is_published', true)
+            ->when($this->enrollmentSubjects($enrollment), function ($query, array $subjects) {
+                $query->where(function ($query) use ($subjects) {
+                    $query->whereIn('subject', $subjects)
+                        ->orWhereHas('resource', fn ($query) => $query->whereIn('subject', $subjects));
+                });
+            })
             ->orderBy('sort_order')
             ->limit(6)
             ->get();
@@ -39,6 +48,12 @@ class SummerClubController extends Controller
             ->withCount('items')
             ->with('resource')
             ->where('is_published', true)
+            ->when($this->enrollmentSubjects($enrollment), function ($query, array $subjects) {
+                $query->where(function ($query) use ($subjects) {
+                    $query->whereIn('subject', $subjects)
+                        ->orWhereHas('resource', fn ($query) => $query->whereIn('subject', $subjects));
+                });
+            })
             ->orderBy('sort_order')
             ->limit(6)
             ->get();
@@ -48,7 +63,9 @@ class SummerClubController extends Controller
 
     public function formations(Request $request)
     {
-        if (! $this->hasConfirmedSummerClubAccess($request)) {
+        $enrollment = $this->activeSummerClubEnrollment($request);
+
+        if (! $enrollment) {
             return view('student.summer-club.locked');
         }
 
@@ -58,6 +75,7 @@ class SummerClubController extends Controller
                 'exercises as published_exercises_count' => fn ($query) => $query->where('is_published', true),
             ])
             ->where('is_published', true)
+            ->when($this->enrollmentSubjects($enrollment), fn ($query, array $subjects) => $query->whereIn('subject', $subjects))
             ->orderBy('sort_order')
             ->get();
 
@@ -66,11 +84,14 @@ class SummerClubController extends Controller
 
     public function showFormation(Request $request, SummerClubResource $resource)
     {
-        if (! $this->hasConfirmedSummerClubAccess($request)) {
+        $enrollment = $this->activeSummerClubEnrollment($request);
+
+        if (! $enrollment) {
             return view('student.summer-club.locked');
         }
 
         abort_unless($resource->is_published, 404);
+        abort_unless($this->canAccessResource($enrollment, $resource), 404);
 
         $resource->load([
             'quizzes' => fn ($query) => $query
@@ -88,13 +109,19 @@ class SummerClubController extends Controller
 
     public function quiz(Request $request, SummerClubQuiz $quiz)
     {
-        if (! $this->hasConfirmedSummerClubAccess($request)) {
+        $enrollment = $this->activeSummerClubEnrollment($request);
+
+        if (! $enrollment) {
             return view('student.summer-club.locked');
         }
 
         abort_unless($quiz->is_published, 404);
 
-        $quiz->load(['questions' => fn ($query) => $query->orderBy('sort_order')]);
+        $quiz->load([
+            'resource',
+            'questions' => fn ($query) => $query->orderBy('sort_order'),
+        ]);
+        abort_unless($this->canAccessSubject($enrollment, $quiz->subject ?: $quiz->resource?->subject), 404);
 
         return view('student.summer-club.quiz', [
             'quiz' => $quiz,
@@ -119,13 +146,19 @@ class SummerClubController extends Controller
 
     public function showExercise(Request $request, SummerClubExercise $exercise)
     {
-        if (! $this->hasConfirmedSummerClubAccess($request)) {
+        $enrollment = $this->activeSummerClubEnrollment($request);
+
+        if (! $enrollment) {
             return view('student.summer-club.locked');
         }
 
         abort_unless($exercise->is_published, 404);
 
-        $exercise->load(['items' => fn ($query) => $query->orderBy('sort_order')]);
+        $exercise->load([
+            'resource',
+            'items' => fn ($query) => $query->orderBy('sort_order'),
+        ]);
+        abort_unless($this->canAccessSubject($enrollment, $exercise->subject ?: $exercise->resource?->subject), 404);
 
         return view('student.summer-club.exercise', [
             'exercise' => $exercise,
@@ -145,12 +178,12 @@ class SummerClubController extends Controller
         ]);
     }
 
-    private function hasConfirmedSummerClubAccess(Request $request): bool
+    private function activeSummerClubEnrollment(Request $request): ?SummerClubEnrollment
     {
         $user = $request->user();
 
         if (! $user) {
-            return false;
+            return null;
         }
 
         /*
@@ -168,6 +201,28 @@ class SummerClubController extends Controller
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>=', now());
             })
-            ->exists();
+            ->latest('confirmed_at')
+            ->first();
+    }
+
+    private function enrollmentSubjects(SummerClubEnrollment $enrollment): array
+    {
+        return array_values(array_filter($enrollment->selected_subjects ?? []));
+    }
+
+    private function canAccessResource(SummerClubEnrollment $enrollment, SummerClubResource $resource): bool
+    {
+        return $this->canAccessSubject($enrollment, $resource->subject);
+    }
+
+    private function canAccessSubject(SummerClubEnrollment $enrollment, ?string $subject): bool
+    {
+        $subjects = $this->enrollmentSubjects($enrollment);
+
+        if ($subjects === []) {
+            return true;
+        }
+
+        return $subject !== null && in_array($subject, $subjects, true);
     }
 }

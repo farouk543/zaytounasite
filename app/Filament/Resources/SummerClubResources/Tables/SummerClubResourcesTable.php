@@ -68,6 +68,19 @@ class SummerClubResourcesTable
                     ->boolean()
                     ->sortable(),
 
+                Tables\Columns\IconColumn::make('is_featured')
+                    ->label('⭐ Mise en avant page Club d’été')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-star')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('warning')
+                    ->falseColor('gray')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('featured_sort_order')
+                    ->label('Ordre mise en avant')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('Ordre')
                     ->sortable(),
@@ -91,6 +104,9 @@ class SummerClubResourcesTable
 
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Publié'),
+
+                Tables\Filters\TernaryFilter::make('is_featured')
+                    ->label('Mises en avant'),
             ])
             ->defaultSort('sort_order')
             ->recordActions([

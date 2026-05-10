@@ -10,6 +10,8 @@ class SummerClubEnrollment extends Model
     protected $fillable = [
         'user_id',
         'pack_name',
+        'pack_key',
+        'selected_subjects',
         'status',
         'starts_at',
         'expires_at',
@@ -19,6 +21,7 @@ class SummerClubEnrollment extends Model
     ];
 
     protected $casts = [
+        'selected_subjects' => 'array',
         'starts_at' => 'datetime',
         'expires_at' => 'datetime',
         'confirmed_at' => 'datetime',

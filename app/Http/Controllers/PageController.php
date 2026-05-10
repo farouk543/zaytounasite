@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SummerClubExercise;
-use App\Models\SummerClubQuiz;
 use App\Models\SummerClubResource;
+use App\Models\SummerClubSubscriptionRequest;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -57,56 +56,16 @@ class PageController extends Controller
     public function summerClub()
     {
         $resources = SummerClubResource::where('is_published', true)
+            ->where('is_featured', true)
+            ->orderBy('featured_sort_order')
             ->orderBy('sort_order')
+            ->limit(4)
             ->get();
-
-        $quizzes = SummerClubQuiz::with('resource')
-            ->where('is_published', true)
-            ->orderBy('sort_order')
-            ->get();
-
-        $exercises = SummerClubExercise::with('resource')
-            ->where('is_published', true)
-            ->orderBy('sort_order')
-            ->get();
-
-        $catalogItems = collect()
-            ->merge($resources->map(fn ($resource) => [
-                'title' => $resource->title,
-                'description' => $resource->description,
-                'subject' => $resource->subject,
-                'level' => $resource->level,
-                'cover_image_path' => $resource->cover_image_path,
-                'kind' => $resource->type === 'fiche' ? 'fiche' : 'formation',
-                'label' => $resource->type === 'fiche' ? 'Fiche de revision' : 'Formation',
-                'sort_order' => $resource->sort_order,
-            ]))
-            ->merge($quizzes->map(fn ($quiz) => [
-                'title' => $quiz->title,
-                'description' => $quiz->description,
-                'subject' => $quiz->subject,
-                'level' => $quiz->level,
-                'cover_image_path' => $quiz->resource?->cover_image_path,
-                'kind' => 'quiz',
-                'label' => 'Quiz interactif',
-                'sort_order' => $quiz->sort_order,
-            ]))
-            ->merge($exercises->map(fn ($exercise) => [
-                'title' => $exercise->title,
-                'description' => $exercise->description,
-                'subject' => $exercise->subject,
-                'level' => $exercise->level,
-                'cover_image_path' => $exercise->cover_image_path ?: $exercise->resource?->cover_image_path,
-                'kind' => 'exercice',
-                'label' => 'Exercice interactif',
-                'sort_order' => $exercise->sort_order,
-            ]))
-            ->sortBy('sort_order')
-            ->values();
 
         return view('club-ete', [
             'resources' => $resources,
-            'catalogItems' => $catalogItems,
+            'packs' => SummerClubSubscriptionRequest::packDefinitions(),
+            'subjects' => SummerClubSubscriptionRequest::subjects(),
         ]);
     }
 }

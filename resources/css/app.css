@@ -3574,3 +3574,335 @@ canvas { max-width: 100%; }
 /* Footer RTL */
 [dir="rtl"] .footer-grid { direction: rtl; }
 [dir="rtl"] .footer-input { text-align: right; }
+
+/* =========================
+   Summer Club subscription flow
+   ========================= */
+.summer-club-successBanner {
+  position: fixed;
+  top: 92px;
+  left: 50%;
+  z-index: 70;
+  width: min(680px, calc(100% - 28px));
+  transform: translateX(-50%);
+  border-radius: 18px;
+  border: 1px solid rgba(22, 101, 52, .16);
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 14px 18px;
+  font-weight: 800;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, .12);
+}
+
+.summer-club-featuredGrid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 700px) {
+  .summer-club-featuredGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .summer-club-featuredGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.summer-club-featuredGrid .summer-club-resourceCard {
+  min-height: 100%;
+}
+
+.summer-club-emptyCatalogue {
+  margin-top: 26px;
+  border-radius: 18px;
+  border: 1px solid rgba(6, 51, 34, .08);
+  background: #fff;
+  color: #64748b;
+  padding: 26px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.summer-club-packGrid {
+  align-items: stretch;
+}
+
+.summer-club-pack {
+  display: flex;
+  min-height: 360px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summer-club-priceLine {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.summer-club-price {
+  color: #063322;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.summer-club-oldPrice {
+  color: #94a3b8;
+  font-size: .98rem;
+  font-weight: 800;
+  text-decoration: line-through;
+}
+
+.summer-club-saving {
+  border-radius: 999px;
+  background: rgba(201, 162, 39, .14);
+  color: #7a5d14;
+  padding: 6px 10px;
+  font-size: .76rem;
+  font-weight: 900;
+}
+
+.summer-club-duration {
+  color: #0f766e;
+  font-size: .92rem;
+  font-weight: 900;
+}
+
+.summer-club-pack .summer-club-cardButton {
+  margin-top: auto;
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  background: #063322;
+  color: #fff;
+}
+
+.summer-club-pack .summer-club-cardButton:hover {
+  background: #0b4a32;
+}
+
+.summer-club-modalOpen {
+  overflow: hidden;
+}
+
+.summer-club-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.summer-club-modal.is-open {
+  display: flex;
+}
+
+.summer-club-modalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 12, 9, .68);
+  backdrop-filter: blur(10px);
+}
+
+.summer-club-modalPanel {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 44px);
+  overflow-y: auto;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: #fff;
+  padding: clamp(22px, 4vw, 34px);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .28);
+}
+
+.summer-club-modalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(6, 51, 34, .07);
+  color: #063322;
+}
+
+.summer-club-modalClose svg {
+  width: 20px;
+  height: 20px;
+}
+
+.summer-club-modalTitle {
+  margin-top: 8px;
+  color: #063322;
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+}
+
+.summer-club-modalMeta {
+  margin-top: 6px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.summer-club-requestForm {
+  margin-top: 24px;
+}
+
+.summer-club-formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 720px) {
+  .summer-club-formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.summer-club-requestForm label span,
+.summer-club-subjectTitle {
+  display: block;
+  margin-bottom: 7px;
+  color: #334155;
+  font-size: .88rem;
+  font-weight: 900;
+}
+
+.summer-club-requestForm input[type="text"],
+.summer-club-requestForm input[type="tel"],
+.summer-club-requestForm input[type="email"] {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid #dbe4ea;
+  background: #fcfdfd;
+  color: #0f172a;
+  padding: 11px 13px;
+  font-weight: 700;
+}
+
+.summer-club-requestForm input:focus {
+  outline: 0;
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, .12);
+}
+
+.summer-club-subjectBlock {
+  margin-top: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(6, 51, 34, .08);
+  background: #f8fafc;
+  padding: 16px;
+}
+
+.summer-club-subjectChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.summer-club-subjectChoice {
+  margin: 0;
+}
+
+.summer-club-subjectChoice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.summer-club-subjectChoice span,
+.summer-club-fixedSubject {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(6, 51, 34, .12);
+  background: #fff;
+  color: #063322;
+  padding: 9px 14px;
+  font-weight: 900;
+}
+
+.summer-club-subjectChoice input:checked + span,
+.summer-club-fixedSubject {
+  border-color: rgba(16, 185, 129, .42);
+  background: rgba(16, 185, 129, .12);
+}
+
+.summer-club-formMessage {
+  min-height: 22px;
+  margin-top: 14px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.summer-club-formMessage.is-success {
+  color: #047857;
+}
+
+.summer-club-formMessage.is-error {
+  color: #b91c1c;
+}
+
+.summer-club-modalActions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.summer-club-submitButton,
+.summer-club-cancelButton {
+  min-height: 48px;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 900;
+}
+
+.summer-club-submitButton {
+  background: #063322;
+  color: #fff;
+}
+
+.summer-club-submitButton:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.summer-club-cancelButton {
+  background: rgba(6, 51, 34, .07);
+  color: #063322;
+}
+
+@media (max-width: 520px) {
+  .summer-club-modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .summer-club-modalPanel {
+    max-height: calc(100vh - 20px);
+    border-radius: 24px 24px 0 0;
+  }
+
+  .summer-club-modalActions > * {
+    width: 100%;
+  }
+}

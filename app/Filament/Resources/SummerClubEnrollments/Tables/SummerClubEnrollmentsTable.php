@@ -32,6 +32,13 @@ class SummerClubEnrollmentsTable
                     ->searchable()
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('selected_subjects')
+                    ->label('Matières')
+                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : ($state ?: '-'))
+                    ->badge()
+                    ->separator(',')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('status')
                     ->label('Statut')
                     ->badge()

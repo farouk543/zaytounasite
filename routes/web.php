@@ -13,6 +13,7 @@ use App\Http\Controllers\ExercisePlayerController;
 use App\Http\Controllers\PackProgressController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SummerClubSubscriptionRequestController;
 use App\Http\Controllers\Student\SummerClubController as StudentSummerClubController;
 
 /*
@@ -40,6 +41,9 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/refunds', [PageController::class, 'refunds'])->name('refunds');
 Route::get('/club-ete', [PageController::class, 'summerClub'])->name('club.ete');
+Route::post('/club-ete/subscription-request', [SummerClubSubscriptionRequestController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('club-ete.subscription-request.store');
 
 /*
 |--------------------------------------------------------------------------

@@ -20,12 +20,16 @@ class SummerClubResource extends Model
         'correction_file_path',
         'is_published',
         'is_locked',
+        'is_featured',
+        'featured_sort_order',
         'sort_order',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
         'is_locked' => 'boolean',
+        'is_featured' => 'boolean',
+        'featured_sort_order' => 'integer',
         'sort_order' => 'integer',
     ];
 
