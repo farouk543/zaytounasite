@@ -4,9 +4,24 @@
   $isHome = request()->routeIs('home');
   $isCatalog = request()->routeIs('catalog') || request()->routeIs('courses.*');
   $isMyCourses = request()->routeIs('my.courses') || request()->routeIs('courses.access') || request()->routeIs('courses.pdf');
+  $isSummerClub = request()->routeIs('student.club-ete.*');
   $isCart = request()->routeIs('cart.*') || request()->routeIs('checkout');
 
   $cartCount = count(session('cart.items', []));
+  $hasActiveSummerClubEnrollment = auth()->check()
+    && \Illuminate\Support\Facades\Route::has('student.club-ete.catalogue')
+    && \App\Models\SummerClubEnrollment::query()
+        ->where('user_id', auth()->id())
+        ->where('status', 'active')
+        ->where(function ($query) {
+            $query->whereNull('starts_at')
+                ->orWhere('starts_at', '<=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('expires_at')
+                ->orWhere('expires_at', '>=', now());
+        })
+        ->exists();
 @endphp
 
 <nav
@@ -45,6 +60,12 @@
           <a class="nav-link {{ $isMyCourses ? 'is-active' : '' }}" href="{{ route('my.courses') }}">
             {{ __('ui.nav.my_courses') }}
           </a>
+
+          @if($hasActiveSummerClubEnrollment)
+            <a class="nav-link {{ $isSummerClub ? 'is-active' : '' }}" href="{{ route('student.club-ete.catalogue') }}">
+              Club d’été
+            </a>
+          @endif
         @endauth
       </div>
 
@@ -148,6 +169,12 @@
           <a class="mobile-link {{ $isMyCourses ? 'is-active' : '' }}" href="{{ route('my.courses') }}" @click="open=false">
             {{ __('ui.nav.my_courses') }}
           </a>
+
+          @if($hasActiveSummerClubEnrollment)
+            <a class="mobile-link {{ $isSummerClub ? 'is-active' : '' }}" href="{{ route('student.club-ete.catalogue') }}" @click="open=false">
+              Club d’été
+            </a>
+          @endif
 
           {{-- Cart (Mobile) --}}
           <a class="mobile-link {{ $isCart ? 'is-active' : '' }}" href="{{ route('cart.show') }}" @click="open=false">
