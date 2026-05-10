@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan:*)",
+      "Bash(sed:*)",
+      "Bash(perl -i -pe 's/\\\\$type === '\\\\''live_pack'\\\\''/$course->isPack\\(\\)/g; s/=== '\\\\''live_pack'\\\\''/=== '\\\\''pack'\\\\''/g; s/delivery_type \\\\?\\\\? '\\\\''pdf'\\\\''\\\\\\) === '\\\\''pdf'\\\\''/isSimpleCourse\\(\\)/g; s/delivery_type \\\\?\\\\? '\\\\''pdf'\\\\''\\\\\\) === '\\\\''live_pack'\\\\''/isPack\\(\\)/g' app/Http/Controllers/DashboardController.php)",
+      "Bash(php -l app/Http/Controllers/DashboardController.php)",
+      "Bash(perl -i -pe 's/\\\\\\(\\\\$course->delivery_type \\\\?\\\\? '\\\\''pdf'\\\\''\\\\\\) === '\\\\''live_pack'\\\\''/$course->isPack\\(\\)/g; s/\\\\$type === '\\\\''live_pack'\\\\''/$course->isPack\\(\\)/g; s/\\\\$isLive = .+?live_pack.+?;/$isLive = $course->isPack\\(\\);/g; s/\\\\$isPack = .+?live_pack.+?;/$isPack = $course->isPack\\(\\);/g' resources/views/catalog/show.blade.php resources/views/courses/access.blade.php resources/views/courses/show.blade.php)",
+      "Bash(grep:*)",
+      "Bash(php:*)",
+      "Read(//c/xampp/apache/logs/**)",
+      "Bash(curl:*)",
+      "Bash(find C:/xampp/htdocs/zaytouna/app -name \"*.php\" -exec php -l {} \\\\;)",
+      "Bash(curl -s -o /tmp/ex_response.html -w 'HTTP STATUS: %{http_code}\\\\n' http://127.0.0.1:8080/exercise/1 -c /tmp/s_cookies.txt -b /tmp/s_cookies.txt -L)",
+      "Bash(grep -c \"error\\\\|Error\\\\|ERROR\\\\|500\\\\|exception\" /tmp/ex_response.html)"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Filament\Resources\QuizQuestions\Pages;
+
+use App\Filament\Resources\QuizQuestions\QuizQuestionResource;
+use Filament\Resources\Pages\ListRecords;
+
+class ListQuizQuestions extends ListRecords
+{
+    protected static string $resource = QuizQuestionResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [];
+    }
+}
