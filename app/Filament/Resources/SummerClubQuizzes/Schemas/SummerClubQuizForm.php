@@ -37,6 +37,7 @@ class SummerClubQuizForm
                             'Français' => 'Français',
                             'Anglais' => 'Anglais',
                             'Mathématiques' => 'Mathématiques',
+                            'Coran' => 'Coran',
                         ])
                         ->nullable(),
 

@@ -11,6 +11,7 @@ class SummerClubSubscriptionRequest extends Model
         'Français',
         'Anglais',
         'Mathématiques',
+        'Coran',
     ];
 
     public const PACKS = [
@@ -38,12 +39,12 @@ class SummerClubSubscriptionRequest extends Model
         ],
         'complete' => [
             'name' => 'Pack Complet',
-            'feature' => 'Français + Anglais + Mathématiques',
+            'feature' => 'Toutes les matières disponibles',
             'description' => 'Le meilleur choix pour préparer la rentrée.',
             'price' => 270,
             'old_price' => 360,
             'duration_months' => 3,
-            'subject_count' => 3,
+            'subject_count' => 4,
             'subjects' => self::SUBJECTS,
             'badge' => 'Le plus recommandé',
         ],

@@ -20,6 +20,7 @@
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_french') }}</span>
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_english') }}</span>
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_math') }}</span>
+                        <span class="summer-club-chip">{{ __('ui.summer_club.badge_quran') }}</span>
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_levels') }}</span>
                     </div>
 
@@ -83,6 +84,10 @@
                 <div class="summer-club-card">
                     <h3 class="summer-club-cardTitle">{{ __('ui.summer_club.badge_math') }}</h3>
                     <p class="summer-club-cardText">{{ __('ui.summer_club.math_text') }}</p>
+                </div>
+                <div class="summer-club-card">
+                    <h3 class="summer-club-cardTitle">{{ __('ui.summer_club.badge_quran') }}</h3>
+                    <p class="summer-club-cardText">{{ __('ui.summer_club.quran_text') }}</p>
                 </div>
             </div>
         </div>

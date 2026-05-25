@@ -70,6 +70,7 @@ class SummerClubExercisesTable
                         'Français' => 'Français',
                         'Anglais' => 'Anglais',
                         'Mathématiques' => 'Mathématiques',
+                        'Coran' => 'Coran',
                     ]),
 
                 Tables\Filters\TernaryFilter::make('is_published')

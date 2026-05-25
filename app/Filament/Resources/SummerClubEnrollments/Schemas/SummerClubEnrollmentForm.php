@@ -36,6 +36,7 @@ class SummerClubEnrollmentForm
                             'Français' => 'Français',
                             'Anglais' => 'Anglais',
                             'Mathématiques' => 'Mathématiques',
+                            'Coran' => 'Coran',
                         ])
                         ->columns(3)
                         ->columnSpanFull(),
