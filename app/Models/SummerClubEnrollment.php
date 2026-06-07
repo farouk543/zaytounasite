@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SummerClubEnrollment extends Model
 {
@@ -12,6 +13,7 @@ class SummerClubEnrollment extends Model
         'pack_name',
         'pack_key',
         'selected_subjects',
+        'level',
         'status',
         'starts_at',
         'expires_at',
@@ -35,6 +37,16 @@ class SummerClubEnrollment extends Model
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(SummerClubQuizAttempt::class);
+    }
+
+    public function exerciseAttempts(): HasMany
+    {
+        return $this->hasMany(SummerClubExerciseAttempt::class);
     }
 
     public function isActive(): bool

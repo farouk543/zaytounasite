@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SummerClubEnrollments\Schemas;
 
+use App\Models\SummerClubSubscriptionRequest;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
@@ -22,33 +23,47 @@ class SummerClubEnrollmentForm
                         ->preload()
                         ->required(),
 
-                    Forms\Components\TextInput::make('pack_name')
+                    Forms\Components\Select::make('pack_key')
                         ->label('Pack')
+                        ->options(SummerClubSubscriptionRequest::packOptions())
+                        ->live()
+                        ->required()
+                        ->afterStateUpdated(function ($state, $set) {
+                            $pack = SummerClubSubscriptionRequest::packDefinitions()[$state] ?? null;
+
+                            $set('pack_name', $pack['name'] ?? null);
+
+                            if (($pack['subjects'] ?? null) !== null) {
+                                $set('selected_subjects', $pack['subjects']);
+                            } else {
+                                $set('selected_subjects', []);
+                            }
+                        }),
+
+                    Forms\Components\TextInput::make('pack_name')
+                        ->label('Nom du pack')
+                        ->disabled()
+                        ->dehydrated()
                         ->maxLength(255),
 
-                    Forms\Components\TextInput::make('pack_key')
-                        ->label('Clé pack')
-                        ->maxLength(255),
+                    Forms\Components\Select::make('level')
+                        ->label('Niveau autorisé')
+                        ->options(SummerClubSubscriptionRequest::levelOptions())
+                        ->helperText('Recommandé pour limiter l’accès au niveau exact de l’étudiant.')
+                        ->searchable()
+                        ->nullable(),
 
                     Forms\Components\CheckboxList::make('selected_subjects')
-                        ->label('Matières')
-                        ->options([
-                            'Français' => 'Français',
-                            'Anglais' => 'Anglais',
-                            'Mathématiques' => 'Mathématiques',
-                            'Coran' => 'Coran',
-                        ])
+                        ->label('Matières autorisées')
+                        ->options(SummerClubSubscriptionRequest::subjectOptions())
                         ->columns(3)
+                        ->required()
+                        ->helperText('Le pack complet force Français, Anglais et Mathématiques.')
                         ->columnSpanFull(),
 
                     Forms\Components\Select::make('status')
                         ->label('Statut')
-                        ->options([
-                            'pending' => 'En attente',
-                            'active' => 'Actif',
-                            'canceled' => 'Annulé',
-                            'expired' => 'Expiré',
-                        ])
+                        ->options(SummerClubSubscriptionRequest::statusOptions())
                         ->default('pending')
                         ->required(),
 

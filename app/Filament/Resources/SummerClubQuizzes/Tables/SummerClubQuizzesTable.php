@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SummerClubQuizzes\Tables;
 
+use App\Models\SummerClubSubscriptionRequest;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -35,6 +36,7 @@ class SummerClubQuizzesTable
 
                 Tables\Columns\TextColumn::make('level')
                     ->label('Niveau')
+                    ->formatStateUsing(fn (?string $state) => SummerClubSubscriptionRequest::levelOptions()[$state] ?? ($state ?: '-'))
                     ->placeholder('-')
                     ->searchable()
                     ->sortable(),
@@ -57,12 +59,11 @@ class SummerClubQuizzesTable
             ->filters([
                 SelectFilter::make('subject')
                     ->label('Matière')
-                    ->options([
-                        'Français' => 'Français',
-                        'Anglais' => 'Anglais',
-                        'Mathématiques' => 'Mathématiques',
-                        'Coran' => 'Coran',
-                    ]),
+                    ->options(SummerClubSubscriptionRequest::subjectOptions()),
+
+                SelectFilter::make('level')
+                    ->label('Niveau')
+                    ->options(SummerClubSubscriptionRequest::levelOptions()),
 
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Publié'),

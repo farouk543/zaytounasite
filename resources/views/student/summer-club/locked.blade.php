@@ -12,7 +12,7 @@
                 </span>
                 <h1>Votre abonnement doit être confirmé.</h1>
                 <p>
-                    Dès validation, le catalogue pédagogique du Club d’été sera disponible ici avec les exercices, quiz et corrections.
+                    {{ $message ?? 'Dès validation, le catalogue pédagogique du Club d’été sera disponible ici avec les exercices, quiz et corrections.' }}
                 </p>
                 <a href="{{ route('club.ete') }}" class="student-club-primaryAction">Retour au Club d’été</a>
             </div>

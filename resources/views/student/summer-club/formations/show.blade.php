@@ -14,7 +14,7 @@
 
     $typeLabel = match ($resource->type) {
         'quiz' => 'Quiz',
-        'fiche' => 'Fiche de révision',
+        'fiche' => 'Fiche de revision',
         'exercice' => 'Exercice',
         default => 'Formation',
     };
@@ -34,7 +34,7 @@
                             <span>{{ $resource->subject }}</span>
                         @endif
                         @if($resource->level)
-                            <span>{{ $resource->level }}</span>
+                            <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$resource->level] ?? $resource->level }}</span>
                         @endif
                     </div>
                     @if($resource->description)
@@ -59,7 +59,7 @@
                 <div class="student-club-contentPanel">
                     <div class="student-club-subhead">
                         <span class="summer-club-eyebrow">Support</span>
-                        <h2>Contenu pédagogique</h2>
+                        <h2>Contenu pedagogique</h2>
                     </div>
 
                     @if($resource->content)
@@ -75,19 +75,20 @@
             @endif
 
             <div class="student-club-subhead">
-                <span class="summer-club-eyebrow">Activités liées</span>
+                <span class="summer-club-eyebrow">Progression</span>
                 <h2>Quiz et exercices</h2>
             </div>
 
             @if($resource->quizzes->isEmpty() && $resource->exercises->isEmpty())
                 <div class="student-club-empty">
-                    Les activités liées à cette formation seront ajoutées prochainement.
+                    Les activites liees a cette formation seront ajoutees prochainement.
                 </div>
             @endif
 
             @if($resource->quizzes->isNotEmpty())
                 <div class="student-club-grid">
                     @foreach($resource->quizzes as $quiz)
+                        @php($attempt = $quizAttempts->get($quiz->id))
                         <a href="{{ route('student.club-ete.quiz.show', $quiz) }}" class="student-club-card student-club-cardLink">
                             <span class="student-club-type">Quiz interactif</span>
                             <h2>{{ $quiz->title }}</h2>
@@ -99,11 +100,23 @@
                                     <span>{{ $quiz->subject }}</span>
                                 @endif
                                 @if($quiz->level)
-                                    <span>{{ $quiz->level }}</span>
+                                    <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$quiz->level] ?? $quiz->level }}</span>
                                 @endif
                                 <span>{{ $quiz->questions_count }} question(s)</span>
                             </div>
-                            <span class="student-club-cardButton">Commencer le quiz</span>
+                            <div class="student-club-metaLine">
+                                @if($attempt)
+                                    <span>Termine</span>
+                                    <span>Meilleur score : {{ $attempt->score }}/{{ $attempt->total }} points ({{ number_format((float) $attempt->percentage, 0) }}%)</span>
+                                    <span>{{ $attempt->passed ? 'Reussi' : 'A revoir' }}</span>
+                                    @if($attempt->completed_at)
+                                        <span>Derniere tentative : {{ $attempt->completed_at->format('d/m/Y H:i') }}</span>
+                                    @endif
+                                @else
+                                    <span>Non commence</span>
+                                @endif
+                            </div>
+                            <span class="student-club-cardButton">{{ $attempt ? 'Revoir le quiz' : 'Commencer le quiz' }}</span>
                         </a>
                     @endforeach
                 </div>
@@ -113,6 +126,7 @@
                 <div class="student-club-grid student-club-gridOffset">
                     @foreach($resource->exercises as $exercise)
                         @php
+                            $attempt = $exerciseAttempts->get($exercise->id);
                             $exerciseCoverUrl = $exercise->cover_image_path
                                 ? \Illuminate\Support\Facades\Storage::disk('public')->url($exercise->cover_image_path)
                                 : $coverUrl;
@@ -131,11 +145,23 @@
                                     <span>{{ $exercise->subject }}</span>
                                 @endif
                                 @if($exercise->level)
-                                    <span>{{ $exercise->level }}</span>
+                                    <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$exercise->level] ?? $exercise->level }}</span>
                                 @endif
-                                <span>{{ $exercise->items_count }} activité(s)</span>
+                                <span>{{ $exercise->items_count }} activite(s)</span>
                             </div>
-                            <span class="student-club-cardButton">Faire l’exercice</span>
+                            <div class="student-club-metaLine">
+                                @if($attempt)
+                                    <span>Termine</span>
+                                    <span>Meilleur score : {{ $attempt->score }}/{{ $attempt->total }} points ({{ number_format((float) $attempt->percentage, 0) }}%)</span>
+                                    <span>{{ $attempt->passed ? 'Reussi' : 'A revoir' }}</span>
+                                    @if($attempt->completed_at)
+                                        <span>Derniere tentative : {{ $attempt->completed_at->format('d/m/Y H:i') }}</span>
+                                    @endif
+                                @else
+                                    <span>Non commence</span>
+                                @endif
+                            </div>
+                            <span class="student-club-cardButton">{{ $attempt ? 'Refaire l exercice' : 'Faire l exercice' }}</span>
                         </a>
                     @endforeach
                 </div>

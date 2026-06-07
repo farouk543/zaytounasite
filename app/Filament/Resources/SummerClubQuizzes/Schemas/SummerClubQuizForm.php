@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SummerClubQuizzes\Schemas;
 
 use App\Models\SummerClubResource;
+use App\Models\SummerClubSubscriptionRequest;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -33,17 +34,14 @@ class SummerClubQuizForm
 
                     Forms\Components\Select::make('subject')
                         ->label('Matière')
-                        ->options([
-                            'Français' => 'Français',
-                            'Anglais' => 'Anglais',
-                            'Mathématiques' => 'Mathématiques',
-                            'Coran' => 'Coran',
-                        ])
+                        ->options(SummerClubSubscriptionRequest::subjectOptions())
                         ->nullable(),
 
-                    Forms\Components\TextInput::make('level')
+                    Forms\Components\Select::make('level')
                         ->label('Niveau scolaire')
-                        ->maxLength(255),
+                        ->options(SummerClubSubscriptionRequest::levelOptions())
+                        ->searchable()
+                        ->nullable(),
 
                     Forms\Components\Textarea::make('description')
                         ->label('Description')

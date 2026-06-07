@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SummerClubSubscriptionRequests\Schemas;
 
+use App\Models\SummerClubSubscriptionRequest;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
@@ -53,12 +54,7 @@ class SummerClubSubscriptionRequestForm
 
                     Forms\Components\CheckboxList::make('selected_subjects')
                         ->label('Matières')
-                        ->options([
-                            'Français' => 'Français',
-                            'Anglais' => 'Anglais',
-                            'Mathématiques' => 'Mathématiques',
-                            'Coran' => 'Coran',
-                        ])
+                        ->options(SummerClubSubscriptionRequest::subjectOptions())
                         ->columns(3)
                         ->columnSpanFull(),
 

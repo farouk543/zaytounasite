@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SummerClubSubscriptionRequests\Tables;
 
 use App\Models\SummerClubEnrollment;
+use App\Models\SummerClubSubscriptionRequest;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -84,11 +85,7 @@ class SummerClubSubscriptionRequestsTable
 
                 SelectFilter::make('pack_key')
                     ->label('Pack')
-                    ->options([
-                        'essential' => 'Pack Essentiel',
-                        'duo' => 'Pack Duo',
-                        'complete' => 'Pack Complet',
-                    ]),
+                    ->options(SummerClubSubscriptionRequest::packOptions()),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
@@ -105,34 +102,43 @@ class SummerClubSubscriptionRequestsTable
                             ->searchable()
                             ->preload()
                             ->required(),
+
+                        Forms\Components\Select::make('level')
+                            ->label('Niveau autorisé')
+                            ->options(SummerClubSubscriptionRequest::levelOptions())
+                            ->searchable()
+                            ->nullable()
+                            ->helperText('Recommandé pour limiter l’accès au niveau précis de l’étudiant.'),
                     ])
                     ->requiresConfirmation()
                     ->action(function ($record, array $data) {
                         $userId = (int) $data['user_id'];
+                        $subjects = SummerClubSubscriptionRequest::subjectsForPack(
+                            $record->pack_key,
+                            $record->selected_subjects ?? []
+                        );
 
                         $record->update([
                             'user_id' => $userId,
+                            'selected_subjects' => $subjects,
                             'status' => 'approved',
                             'approved_at' => now(),
                             'approved_by' => auth()->id(),
                         ]);
 
-                        SummerClubEnrollment::updateOrCreate(
-                            [
-                                'user_id' => $userId,
-                                'pack_key' => $record->pack_key,
-                            ],
-                            [
-                                'pack_name' => $record->pack_name,
-                                'selected_subjects' => $record->selected_subjects,
-                                'status' => 'active',
-                                'starts_at' => now(),
-                                'expires_at' => now()->addMonths((int) $record->duration_months),
-                                'confirmed_at' => now(),
-                                'confirmed_by' => auth()->id(),
-                                'notes' => "Créé depuis la demande d'abonnement #{$record->id}",
-                            ]
-                        );
+                        SummerClubEnrollment::create([
+                            'user_id' => $userId,
+                            'pack_key' => $record->pack_key,
+                            'pack_name' => SummerClubSubscriptionRequest::packDefinitions()[$record->pack_key]['name'] ?? $record->pack_name,
+                            'selected_subjects' => $subjects,
+                            'level' => $data['level'] ?? null,
+                            'status' => 'active',
+                            'starts_at' => now(),
+                            'expires_at' => now()->addMonths(3),
+                            'confirmed_at' => now(),
+                            'confirmed_by' => auth()->id(),
+                            'notes' => "Créé depuis la demande d'abonnement #{$record->id}",
+                        ]);
                     }),
 
                 Action::make('reject')

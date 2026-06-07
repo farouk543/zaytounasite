@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SummerClubResources\Tables;
 
+use App\Models\SummerClubSubscriptionRequest;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -54,6 +55,7 @@ class SummerClubResourcesTable
 
                 Tables\Columns\TextColumn::make('level')
                     ->label('Niveau')
+                    ->formatStateUsing(fn (?string $state) => SummerClubSubscriptionRequest::levelOptions()[$state] ?? ($state ?: '-'))
                     ->placeholder('-')
                     ->searchable()
                     ->sortable(),
@@ -69,7 +71,7 @@ class SummerClubResourcesTable
                     ->sortable(),
 
                 Tables\Columns\IconColumn::make('is_featured')
-                    ->label('⭐ Mise en avant page Club d’été')
+                    ->label('Mise en avant page Club d’été')
                     ->boolean()
                     ->trueIcon('heroicon-o-star')
                     ->falseIcon('heroicon-o-minus')
@@ -96,12 +98,11 @@ class SummerClubResourcesTable
 
                 SelectFilter::make('subject')
                     ->label('Matière')
-                    ->options([
-                        'Français' => 'Français',
-                        'Anglais' => 'Anglais',
-                        'Mathématiques' => 'Mathématiques',
-                        'Coran' => 'Coran',
-                    ]),
+                    ->options(SummerClubSubscriptionRequest::subjectOptions()),
+
+                SelectFilter::make('level')
+                    ->label('Niveau')
+                    ->options(SummerClubSubscriptionRequest::levelOptions()),
 
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Publié'),

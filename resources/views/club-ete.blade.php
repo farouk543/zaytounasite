@@ -21,6 +21,7 @@
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_english') }}</span>
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_math') }}</span>
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_quran') }}</span>
+                        <span class="summer-club-chip">{{ __('ui.summer_club.badge_arabic') }}</span>
                         <span class="summer-club-chip">{{ __('ui.summer_club.badge_levels') }}</span>
                     </div>
 
@@ -89,6 +90,10 @@
                     <h3 class="summer-club-cardTitle">{{ __('ui.summer_club.badge_quran') }}</h3>
                     <p class="summer-club-cardText">{{ __('ui.summer_club.quran_text') }}</p>
                 </div>
+                <div class="summer-club-card">
+                    <h3 class="summer-club-cardTitle">{{ __('ui.summer_club.badge_arabic') }}</h3>
+                    <p class="summer-club-cardText">{{ __('ui.summer_club.arabic_text') }}</p>
+                </div>
             </div>
         </div>
     </section>
@@ -134,7 +139,7 @@
                                         <span>{{ $resource->subject }}</span>
                                     @endif
                                     @if($resource->level)
-                                        <span>{{ $resource->level }}</span>
+                                        <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$resource->level] ?? $resource->level }}</span>
                                     @endif
                                 </span>
 
@@ -391,7 +396,7 @@
 
         if (packKey === 'complete') {
             title.textContent = 'Matières incluses';
-            window.summerClubSubjects.forEach(function (subject) {
+            (pack.subjects || []).forEach(function (subject) {
                 var input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'selected_subjects[]';

@@ -6,7 +6,9 @@
 <div
     class="student-quiz-page"
     x-data="summerClubQuiz({
-        questions: @js($questions)
+        questions: @js($questions),
+        submitUrl: @js($submitUrl),
+        csrfToken: @js(csrf_token())
     })"
 >
     <section class="student-quiz-shell">
@@ -20,6 +22,12 @@
                     <span class="student-quiz-counter" x-text="finished ? 'Résultat' : ((currentIndex + 1) + ' / ' + questions.length)"></span>
                 </div>
 
+                @if($lastAttempt)
+                    <div class="student-quiz-badge">
+                        Meilleur score : {{ $lastAttempt->score }} / {{ $lastAttempt->total }} points - {{ number_format((float) $lastAttempt->percentage, 0) }}%
+                    </div>
+                @endif
+
                 <div class="student-quiz-progress" aria-hidden="true">
                     <span :style="`width: ${progress}%`"></span>
                 </div>
@@ -31,15 +39,12 @@
                                 <template x-if="current.media_type === 'image' && mediaSource(current)">
                                     <img :src="mediaSource(current)" alt="">
                                 </template>
-
                                 <template x-if="current.media_type === 'video' && current.media_path_url">
                                     <video :src="current.media_path_url" controls></video>
                                 </template>
-
                                 <template x-if="current.media_type === 'video' && !current.media_path_url && current.media_url">
                                     <a :href="current.media_url" target="_blank" rel="noopener">Ouvrir la vidéo</a>
                                 </template>
-
                                 <template x-if="current.media_type === 'audio' && mediaSource(current)">
                                     <audio :src="mediaSource(current)" controls></audio>
                                 </template>
@@ -63,35 +68,25 @@
                             </template>
                         </div>
 
-                        <button type="button" class="student-quiz-next" :disabled="!answers[current.id]" @click="next()">
-                            <span x-text="currentIndex + 1 === questions.length ? 'Voir mon résultat' : 'Question suivante'"></span>
+                        <button type="button" class="student-quiz-next" :disabled="!answers[current.id] || submitting" @click="next()">
+                            <span x-show="!submitting" x-text="currentIndex + 1 === questions.length ? 'Enregistrer mon résultat' : 'Question suivante'"></span>
+                            <span x-show="submitting">Enregistrement...</span>
                         </button>
                     </div>
                 </template>
 
-                <template x-if="finished">
+                <template x-if="finished && result">
                     <div class="student-quiz-result" x-transition>
-                        <div class="student-quiz-badge" x-text="resultMessage"></div>
-                        <h2><span x-text="score"></span> / <span x-text="totalPoints"></span> points</h2>
-                        <p>
-                            <strong x-text="correctCount"></strong> bonne(s) réponse(s) -
-                            <strong x-text="percentage + '%'"></strong>
-                        </p>
+                        <div class="student-quiz-badge" x-text="result.passed ? 'Réussi' : 'À revoir'"></div>
+                        <h2><span x-text="result.score"></span> / <span x-text="result.total"></span> points</h2>
+                        <p><strong x-text="Math.round(result.percentage) + '%'"></strong> de réussite</p>
+                        <p x-text="result.message"></p>
+                    </div>
+                </template>
 
-                        <div class="student-quiz-corrections">
-                            <template x-for="(question, index) in questions" :key="question.id">
-                                <article class="student-quiz-correction" :class="{ 'is-correct': answers[question.id] === question.correct }">
-                                    <h3 x-text="(index + 1) + '. ' + question.question"></h3>
-                                    <p>
-                                        Ta réponse :
-                                        <strong x-text="answers[question.id] ? answers[question.id].toUpperCase() : '-'"></strong>
-                                        <span> / Bonne réponse : </span>
-                                        <strong x-text="question.correct.toUpperCase()"></strong>
-                                    </p>
-                                    <p x-show="question.explanation" x-text="question.explanation"></p>
-                                </article>
-                            </template>
-                        </div>
+                <template x-if="error">
+                    <div class="student-quiz-correction">
+                        <p x-text="error"></p>
                     </div>
                 </template>
             </div>
@@ -103,11 +98,17 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
-    Alpine.data('summerClubQuiz', ({ questions }) => ({
+    Alpine.data('summerClubQuiz', ({ questions, submitUrl, csrfToken }) => ({
         questions,
+        submitUrl,
+        csrfToken,
         currentIndex: 0,
         answers: {},
+        startedAt: new Date().toISOString(),
+        submitting: false,
         finished: false,
+        result: null,
+        error: '',
         get current() {
             return this.questions[this.currentIndex] || {};
         },
@@ -115,37 +116,50 @@ document.addEventListener('alpine:init', () => {
             if (!this.questions.length) return 100;
             return this.finished ? 100 : Math.round((this.currentIndex / this.questions.length) * 100);
         },
-        get totalPoints() {
-            return this.questions.reduce((total, question) => total + Number(question.points || 0), 0);
-        },
-        get score() {
-            return this.questions.reduce((total, question) => {
-                return total + (this.answers[question.id] === question.correct ? Number(question.points || 0) : 0);
-            }, 0);
-        },
-        get correctCount() {
-            return this.questions.filter((question) => this.answers[question.id] === question.correct).length;
-        },
-        get percentage() {
-            return this.totalPoints > 0 ? Math.round((this.score / this.totalPoints) * 100) : 0;
-        },
-        get resultMessage() {
-            if (this.percentage >= 80) return 'Excellent travail';
-            if (this.percentage >= 50) return 'Bonne progression';
-            return 'Continue, tu vas y arriver';
-        },
         mediaSource(question) {
             return question.media_path_url || question.media_url || null;
         },
         next() {
-            if (!this.answers[this.current.id]) return;
+            if (!this.answers[this.current.id] || this.submitting) return;
 
             if (this.currentIndex + 1 >= this.questions.length) {
-                this.finished = true;
+                this.submit();
                 return;
             }
 
             this.currentIndex++;
+        },
+        submit() {
+            this.submitting = true;
+            this.error = '';
+
+            fetch(this.submitUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    answers: this.answers,
+                    started_at: this.startedAt
+                })
+            })
+                .then((response) => response.json().then((data) => {
+                    if (!response.ok) throw data;
+                    return data;
+                }))
+                .then((data) => {
+                    this.result = data;
+                    this.finished = true;
+                })
+                .catch(() => {
+                    this.error = "Impossible d'enregistrer la tentative. Veuillez réessayer.";
+                })
+                .finally(() => {
+                    this.submitting = false;
+                });
         },
     }));
 });

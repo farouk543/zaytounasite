@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SummerClubSubscriptionRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class SummerClubSubscriptionRequestController extends Controller
 {
@@ -25,14 +24,10 @@ class SummerClubSubscriptionRequestController extends Controller
         ]);
 
         $pack = $packs[$validated['pack_key']];
-        $selectedSubjects = $pack['subjects'] ?: array_values(array_unique($validated['selected_subjects'] ?? []));
-        $expectedSubjectCount = (int) $pack['subject_count'];
-
-        if (count($selectedSubjects) !== $expectedSubjectCount) {
-            throw ValidationException::withMessages([
-                'selected_subjects' => "Veuillez sélectionner {$expectedSubjectCount} matière(s) pour ce pack.",
-            ]);
-        }
+        $selectedSubjects = SummerClubSubscriptionRequest::subjectsForPack(
+            $validated['pack_key'],
+            $validated['selected_subjects'] ?? []
+        );
 
         SummerClubSubscriptionRequest::create([
             'user_id' => $request->user()?->id,

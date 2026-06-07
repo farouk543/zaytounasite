@@ -5,7 +5,11 @@
 @section('content')
 <div
     class="student-quiz-page"
-    x-data="summerClubExercise({ items: @js($items) })"
+    x-data="summerClubExercise({
+        items: @js($items),
+        submitUrl: @js($submitUrl),
+        csrfToken: @js(csrf_token())
+    })"
 >
     <section class="student-quiz-shell">
         <div class="za-container">
@@ -15,8 +19,14 @@
                         <span class="summer-club-eyebrow">Exercice interactif</span>
                         <h1>{{ $exercise->title }}</h1>
                     </div>
-                    <span class="student-quiz-counter" x-text="finished ? 'Correction' : ((currentIndex + 1) + ' / ' + items.length)"></span>
+                    <span class="student-quiz-counter" x-text="finished ? 'Resultat' : ((currentIndex + 1) + ' / ' + items.length)"></span>
                 </div>
+
+                @if($lastAttempt)
+                    <div class="student-quiz-badge">
+                        Meilleur score : {{ $lastAttempt->score }} / {{ $lastAttempt->total }} points - {{ number_format((float) $lastAttempt->percentage, 0) }}%
+                    </div>
+                @endif
 
                 <div class="student-quiz-progress" aria-hidden="true">
                     <span :style="`width: ${progress}%`"></span>
@@ -33,7 +43,7 @@
                                     <video :src="current.media_path_url" controls></video>
                                 </template>
                                 <template x-if="current.media_type === 'video' && !current.media_path_url && current.media_url">
-                                    <a :href="current.media_url" target="_blank" rel="noopener">Ouvrir la vidéo</a>
+                                    <a :href="current.media_url" target="_blank" rel="noopener">Ouvrir la video</a>
                                 </template>
                                 <template x-if="current.media_type === 'audio' && mediaSource(current)">
                                     <audio :src="mediaSource(current)" controls></audio>
@@ -63,7 +73,7 @@
                         </template>
 
                         <template x-if="['fill_blank', 'short_answer'].includes(current.type)">
-                            <input class="student-exercise-input" type="text" x-model="answers[current.id]" placeholder="Ta réponse">
+                            <input class="student-exercise-input" type="text" x-model="answers[current.id]" placeholder="Ta reponse">
                         </template>
 
                         <template x-if="current.type === 'matching'">
@@ -115,35 +125,31 @@
                                 <template x-for="label in (current.options?.labels || [])" :key="label.key">
                                     <label>
                                         <span x-text="label.text"></span>
-                                        <input type="text" x-model="labelAnswers[current.id][label.key]" placeholder="Réponse">
+                                        <input type="text" x-model="labelAnswers[current.id][label.key]" placeholder="Reponse">
                                     </label>
                                 </template>
                             </div>
                         </template>
 
-                        <button type="button" class="student-quiz-next" :disabled="!hasAnswer(current)" @click="next()">
-                            <span x-text="currentIndex + 1 === items.length ? 'Voir la correction' : 'Activité suivante'"></span>
+                        <button type="button" class="student-quiz-next" :disabled="!hasAnswer(current) || submitting" @click="next()">
+                            <span x-show="!submitting" x-text="currentIndex + 1 === items.length ? 'Enregistrer mon resultat' : 'Activite suivante'"></span>
+                            <span x-show="submitting">Enregistrement...</span>
                         </button>
                     </div>
                 </template>
 
-                <template x-if="finished">
+                <template x-if="finished && result">
                     <div class="student-quiz-result" x-transition>
-                        <div class="student-quiz-badge" x-text="resultMessage"></div>
-                        <h2><span x-text="score"></span> / <span x-text="totalPoints"></span> points</h2>
-                        <p><strong x-text="percentage + '%'"></strong> de réussite</p>
+                        <div class="student-quiz-badge" x-text="result.passed ? 'Reussi' : 'A revoir'"></div>
+                        <h2><span x-text="result.score"></span> / <span x-text="result.total"></span> points</h2>
+                        <p><strong x-text="Math.round(result.percentage) + '%'"></strong> de reussite</p>
+                        <p x-text="result.message"></p>
+                    </div>
+                </template>
 
-                        <div class="student-quiz-corrections">
-                            <template x-for="(item, index) in items" :key="item.id">
-                                <article class="student-quiz-correction" :class="{ 'is-correct': isCorrect(item) }">
-                                    <h3 x-text="(index + 1) + '. ' + item.instruction"></h3>
-                                    <p x-show="item.question" x-text="item.question"></p>
-                                    <p x-text="isCorrect(item) ? 'Réponse correcte' : 'Réponse à revoir'"></p>
-                                    <p class="student-correction-detail" x-text="correctionText(item)"></p>
-                                    <p x-show="item.explanation" x-text="item.explanation"></p>
-                                </article>
-                            </template>
-                        </div>
+                <template x-if="error">
+                    <div class="student-quiz-correction">
+                        <p x-text="error"></p>
                     </div>
                 </template>
             </div>
@@ -155,8 +161,10 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
-    Alpine.data('summerClubExercise', ({ items }) => ({
+    Alpine.data('summerClubExercise', ({ items, submitUrl, csrfToken }) => ({
         items,
+        submitUrl,
+        csrfToken,
         currentIndex: 0,
         answers: {},
         matchingAnswers: {},
@@ -164,13 +172,18 @@ document.addEventListener('alpine:init', () => {
         dragAnswers: {},
         labelAnswers: {},
         shuffledRight: {},
+        startedAt: new Date().toISOString(),
+        submitting: false,
         finished: false,
+        result: null,
+        error: '',
         init() {
             this.items.forEach((item) => {
                 this.matchingAnswers[item.id] = {};
                 this.dragAnswers[item.id] = {};
                 this.labelAnswers[item.id] = {};
                 this.shuffledRight[item.id] = this.shuffle([...(item.options?.right || [])]);
+
                 if (item.type === 'ordering') {
                     this.orderingAnswers[item.id] = this.shuffle([...this.optionArray(item)]);
                 }
@@ -182,20 +195,6 @@ document.addEventListener('alpine:init', () => {
         get progress() {
             if (!this.items.length) return 100;
             return this.finished ? 100 : Math.round((this.currentIndex / this.items.length) * 100);
-        },
-        get totalPoints() {
-            return this.items.reduce((total, item) => total + Number(item.points || 0), 0);
-        },
-        get score() {
-            return this.items.reduce((total, item) => total + (this.isCorrect(item) ? Number(item.points || 0) : 0), 0);
-        },
-        get percentage() {
-            return this.totalPoints > 0 ? Math.round((this.score / this.totalPoints) * 100) : 0;
-        },
-        get resultMessage() {
-            if (this.percentage >= 80) return 'Bravo, maîtrise solide';
-            if (this.percentage >= 50) return 'Bonne progression';
-            return 'On révise et on recommence';
         },
         mediaSource(item) {
             return item.media_path_url || item.media_url || null;
@@ -209,9 +208,6 @@ document.addEventListener('alpine:init', () => {
                 .sort((a, b) => a.sort - b.sort)
                 .map(({ value }) => value);
         },
-        normalize(value) {
-            return String(value ?? '').trim().toLowerCase();
-        },
         toggleChoice(item, key, checked) {
             const current = Array.isArray(this.answers[item.id]) ? [...this.answers[item.id]] : [];
             this.answers[item.id] = checked ? [...new Set([...current, key])] : current.filter((value) => value !== key);
@@ -219,7 +215,9 @@ document.addEventListener('alpine:init', () => {
         moveOrder(itemId, index, direction) {
             const next = index + direction;
             const list = this.orderingAnswers[itemId] || [];
+
             if (next < 0 || next >= list.length) return;
+
             [list[index], list[next]] = [list[next], list[index]];
             this.orderingAnswers[itemId] = [...list];
         },
@@ -229,107 +227,67 @@ document.addEventListener('alpine:init', () => {
             if (item.type === 'drag_drop') return Object.values(this.dragAnswers[item.id] || {}).some(Boolean);
             if (item.type === 'image_labeling') return Object.values(this.labelAnswers[item.id] || {}).some(Boolean);
             if (item.type === 'multiple_choice') return Array.isArray(this.answers[item.id]) && this.answers[item.id].length > 0;
+
             return Boolean(this.answers[item.id]);
         },
-        isCorrect(item) {
-            const correct = item.correct_answer || {};
+        answerPayload() {
+            return this.items.reduce((payload, item) => {
+                if (item.type === 'matching') {
+                    payload[item.id] = this.matchingAnswers[item.id] || {};
+                } else if (item.type === 'ordering') {
+                    payload[item.id] = (this.orderingAnswers[item.id] || []).map((option) => option.key);
+                } else if (item.type === 'drag_drop') {
+                    payload[item.id] = this.dragAnswers[item.id] || {};
+                } else if (item.type === 'image_labeling') {
+                    payload[item.id] = this.labelAnswers[item.id] || {};
+                } else {
+                    payload[item.id] = this.answers[item.id] ?? null;
+                }
 
-            if (item.type === 'multiple_choice') {
-                const expected = [...(correct.answers || [])].sort().join('|');
-                const given = [...(this.answers[item.id] || [])].sort().join('|');
-                return expected === given;
-            }
-
-            if (item.type === 'true_false') {
-                return this.answers[item.id] === correct.answer;
-            }
-
-            if (['fill_blank', 'short_answer'].includes(item.type)) {
-                return (correct.answers || []).map(this.normalize).includes(this.normalize(this.answers[item.id]));
-            }
-
-            if (item.type === 'matching') {
-                return (correct.pairs || []).every((pair) => (this.matchingAnswers[item.id] || {})[pair.left] === pair.right);
-            }
-
-            if (item.type === 'ordering') {
-                const given = (this.orderingAnswers[item.id] || []).map((option) => option.key).join('|');
-                return (correct.order || []).join('|') === given;
-            }
-
-            if (item.type === 'drag_drop') {
-                return (correct.matches || []).every((match) => (this.dragAnswers[item.id] || {})[match.item] === match.zone);
-            }
-
-            if (item.type === 'image_labeling') {
-                return (correct.answers || []).every((answer) => this.normalize((this.labelAnswers[item.id] || {})[answer.label]) === this.normalize(answer.answer));
-            }
-
-            return false;
-        },
-        correctionText(item) {
-            const correct = item.correct_answer || {};
-
-            if (item.type === 'multiple_choice') {
-                const labels = this.optionArray(item)
-                    .filter((option) => (correct.answers || []).includes(option.key))
-                    .map((option) => option.text);
-                return labels.length ? `Réponse attendue : ${labels.join(', ')}` : '';
-            }
-
-            if (item.type === 'true_false') {
-                return `Réponse attendue : ${correct.answer === 'true' ? 'Vrai' : 'Faux'}`;
-            }
-
-            if (['fill_blank', 'short_answer'].includes(item.type)) {
-                return `Réponses acceptées : ${(correct.answers || []).join(', ')}`;
-            }
-
-            if (item.type === 'matching') {
-                const left = item.options?.left || [];
-                const right = item.options?.right || [];
-                const pairs = (correct.pairs || []).map((pair) => {
-                    const l = left.find((entry) => entry.key === pair.left)?.text || pair.left;
-                    const r = right.find((entry) => entry.key === pair.right)?.text || pair.right;
-                    return `${l} → ${r}`;
-                });
-                return pairs.length ? `Correspondances : ${pairs.join(' | ')}` : '';
-            }
-
-            if (item.type === 'ordering') {
-                const ordered = (correct.order || []).map((key) => this.optionArray(item).find((entry) => entry.key === key)?.text || key);
-                return ordered.length ? `Ordre attendu : ${ordered.join(' → ')}` : '';
-            }
-
-            if (item.type === 'drag_drop') {
-                const items = item.options?.items || [];
-                const zones = item.options?.zones || [];
-                const matches = (correct.matches || []).map((match) => {
-                    const itemText = items.find((entry) => entry.key === match.item)?.text || match.item;
-                    const zoneText = zones.find((entry) => entry.key === match.zone)?.text || match.zone;
-                    return `${itemText} → ${zoneText}`;
-                });
-                return matches.length ? `Zones attendues : ${matches.join(' | ')}` : '';
-            }
-
-            if (item.type === 'image_labeling') {
-                const labels = item.options?.labels || [];
-                const answers = (correct.answers || []).map((answer) => {
-                    const label = labels.find((entry) => entry.key === answer.label)?.text || answer.label;
-                    return `${label} : ${answer.answer}`;
-                });
-                return answers.length ? `Légendes attendues : ${answers.join(' | ')}` : '';
-            }
-
-            return '';
+                return payload;
+            }, {});
         },
         next() {
-            if (!this.hasAnswer(this.current)) return;
+            if (!this.hasAnswer(this.current) || this.submitting) return;
+
             if (this.currentIndex + 1 >= this.items.length) {
-                this.finished = true;
+                this.submit();
                 return;
             }
+
             this.currentIndex++;
+        },
+        submit() {
+            this.submitting = true;
+            this.error = '';
+
+            fetch(this.submitUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    answers: this.answerPayload(),
+                    started_at: this.startedAt
+                })
+            })
+                .then((response) => response.json().then((data) => {
+                    if (!response.ok) throw data;
+                    return data;
+                }))
+                .then((data) => {
+                    this.result = data;
+                    this.finished = true;
+                })
+                .catch(() => {
+                    this.error = "Impossible d'enregistrer la tentative. Veuillez reessayer.";
+                })
+                .finally(() => {
+                    this.submitting = false;
+                });
         },
     }));
 });

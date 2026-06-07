@@ -34,6 +34,11 @@ class SummerClubQuiz extends Model
         return $this->hasMany(SummerClubQuizQuestion::class)->orderBy('sort_order');
     }
 
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(SummerClubQuizAttempt::class);
+    }
+
     public function getTotalPointsAttribute(): int
     {
         return (int) $this->questions()->sum('points');

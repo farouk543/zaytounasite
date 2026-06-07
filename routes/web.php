@@ -134,8 +134,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/student/club-ete/quiz/{quiz}', [StudentSummerClubController::class, 'quiz'])
         ->name('student.club-ete.quiz.show');
 
+    Route::post('/student/club-ete/quiz/{quiz}/submit', [StudentSummerClubController::class, 'submitQuiz'])
+        ->middleware('throttle:20,1')
+        ->name('student.club-ete.quiz.submit');
+
     Route::get('/student/club-ete/exercise/{exercise}', [StudentSummerClubController::class, 'showExercise'])
         ->name('student.club-ete.exercise.show');
+
+    Route::post('/student/club-ete/exercise/{exercise}/submit', [StudentSummerClubController::class, 'submitExercise'])
+        ->middleware('throttle:20,1')
+        ->name('student.club-ete.exercise.submit');
 
     /*
     |--------------------------------------------------------------------------

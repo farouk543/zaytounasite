@@ -21,6 +21,8 @@
             $query->whereNull('expires_at')
                 ->orWhere('expires_at', '>=', now());
         })
+        ->whereNotNull('selected_subjects')
+        ->whereJsonLength('selected_subjects', '>', 0)
         ->exists();
 @endphp
 
