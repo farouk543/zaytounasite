@@ -44,7 +44,7 @@ class SummerClubQuizAttemptsTable
                     ->formatStateUsing(function (?string $state, $record) {
                         $level = $state ?: $record->quiz?->resource?->level;
 
-                        return SummerClubSubscriptionRequest::levelOptions()[$level] ?? ($level ?: '-');
+                        return SummerClubSubscriptionRequest::levelLabel($level);
                     })
                     ->placeholder('-')
                     ->sortable(),

@@ -49,6 +49,7 @@ class SummerClubEnrollmentForm
                     Forms\Components\Select::make('level')
                         ->label('Niveau autorisé')
                         ->options(SummerClubSubscriptionRequest::levelOptions())
+                        ->in(array_keys(SummerClubSubscriptionRequest::levelOptions()))
                         ->helperText('Recommandé pour limiter l’accès au niveau exact de l’étudiant.')
                         ->searchable()
                         ->nullable(),

@@ -139,7 +139,7 @@
                                         <span>{{ $resource->subject }}</span>
                                     @endif
                                     @if($resource->level)
-                                        <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$resource->level] ?? $resource->level }}</span>
+                                        <span>{{ \App\Models\SummerClubSubscriptionRequest::levelLabel($resource->level) }}</span>
                                     @endif
                                 </span>
 

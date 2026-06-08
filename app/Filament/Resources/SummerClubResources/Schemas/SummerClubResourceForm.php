@@ -38,6 +38,7 @@ class SummerClubResourceForm
                     Forms\Components\Select::make('level')
                         ->label('Niveau scolaire')
                         ->options(SummerClubSubscriptionRequest::levelOptions())
+                        ->in(array_keys(SummerClubSubscriptionRequest::levelOptions()))
                         ->searchable()
                         ->nullable(),
 

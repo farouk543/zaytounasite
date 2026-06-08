@@ -55,7 +55,7 @@ class SummerClubResourcesTable
 
                 Tables\Columns\TextColumn::make('level')
                     ->label('Niveau')
-                    ->formatStateUsing(fn (?string $state) => SummerClubSubscriptionRequest::levelOptions()[$state] ?? ($state ?: '-'))
+                    ->formatStateUsing(fn (?string $state) => SummerClubSubscriptionRequest::levelLabel($state))
                     ->placeholder('-')
                     ->searchable()
                     ->sortable(),

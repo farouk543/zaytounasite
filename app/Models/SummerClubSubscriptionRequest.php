@@ -23,19 +23,9 @@ class SummerClubSubscriptionRequest extends Model
     ];
 
     public const LEVELS = [
-        'primaire_1' => 'Primaire 1',
-        'primaire_2' => 'Primaire 2',
-        'primaire_3' => 'Primaire 3',
-        'primaire_4' => 'Primaire 4',
-        'primaire_5' => 'Primaire 5',
-        'primaire_6' => 'Primaire 6',
-        'college_7' => 'Collège 7',
-        'college_8' => 'Collège 8',
-        'college_9' => 'Collège 9',
-        'lycee_1' => 'Lycée 1',
-        'lycee_2' => 'Lycée 2',
-        'lycee_3' => 'Lycée 3',
-        'lycee_4' => 'Lycée 4',
+        '1' => 'Niveau 1',
+        '2' => 'Niveau 2',
+        '3' => 'Niveau 3',
     ];
 
     public const PACKS = [
@@ -120,6 +110,32 @@ class SummerClubSubscriptionRequest extends Model
         return self::LEVELS;
     }
 
+    public static function levelLabel(?string $level): string
+    {
+        if (blank($level)) {
+            return '-';
+        }
+
+        return self::LEVELS[(string) $level] ?? 'Ancien niveau';
+    }
+
+    public static function normalizeLevel(mixed $level): ?string
+    {
+        if (blank($level)) {
+            return null;
+        }
+
+        $level = (string) $level;
+
+        if (! array_key_exists($level, self::LEVELS)) {
+            throw ValidationException::withMessages([
+                'level' => 'Niveau Club d’été invalide.',
+            ]);
+        }
+
+        return $level;
+    }
+
     public static function packOptions(): array
     {
         return collect(self::PACKS)
@@ -182,6 +198,7 @@ class SummerClubSubscriptionRequest extends Model
 
         $data['pack_name'] = $pack['name'];
         $data['selected_subjects'] = self::subjectsForPack($packKey, $data['selected_subjects'] ?? []);
+        $data['level'] = self::normalizeLevel($data['level'] ?? null);
 
         if (($data['status'] ?? null) === 'active') {
             $data['starts_at'] ??= now();

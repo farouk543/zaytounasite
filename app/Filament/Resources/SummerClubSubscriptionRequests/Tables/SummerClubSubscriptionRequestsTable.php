@@ -106,6 +106,7 @@ class SummerClubSubscriptionRequestsTable
                         Forms\Components\Select::make('level')
                             ->label('Niveau autorisé')
                             ->options(SummerClubSubscriptionRequest::levelOptions())
+                            ->in(array_keys(SummerClubSubscriptionRequest::levelOptions()))
                             ->searchable()
                             ->nullable()
                             ->helperText('Recommandé pour limiter l’accès au niveau précis de l’étudiant.'),
@@ -131,7 +132,7 @@ class SummerClubSubscriptionRequestsTable
                             'pack_key' => $record->pack_key,
                             'pack_name' => SummerClubSubscriptionRequest::packDefinitions()[$record->pack_key]['name'] ?? $record->pack_name,
                             'selected_subjects' => $subjects,
-                            'level' => $data['level'] ?? null,
+                            'level' => SummerClubSubscriptionRequest::normalizeLevel($data['level'] ?? null),
                             'status' => 'active',
                             'starts_at' => now(),
                             'expires_at' => now()->addMonths(3),

@@ -34,7 +34,7 @@
                             <span>{{ $resource->subject }}</span>
                         @endif
                         @if($resource->level)
-                            <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$resource->level] ?? $resource->level }}</span>
+                            <span>{{ \App\Models\SummerClubSubscriptionRequest::levelLabel($resource->level) }}</span>
                         @endif
                     </div>
                     @if($resource->description)
@@ -100,7 +100,7 @@
                                     <span>{{ $quiz->subject }}</span>
                                 @endif
                                 @if($quiz->level)
-                                    <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$quiz->level] ?? $quiz->level }}</span>
+                                    <span>{{ \App\Models\SummerClubSubscriptionRequest::levelLabel($quiz->level) }}</span>
                                 @endif
                                 <span>{{ $quiz->questions_count }} question(s)</span>
                             </div>
@@ -145,7 +145,7 @@
                                     <span>{{ $exercise->subject }}</span>
                                 @endif
                                 @if($exercise->level)
-                                    <span>{{ \App\Models\SummerClubSubscriptionRequest::levelOptions()[$exercise->level] ?? $exercise->level }}</span>
+                                    <span>{{ \App\Models\SummerClubSubscriptionRequest::levelLabel($exercise->level) }}</span>
                                 @endif
                                 <span>{{ $exercise->items_count }} activite(s)</span>
                             </div>
