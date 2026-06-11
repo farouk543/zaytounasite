@@ -4,7 +4,8 @@
   $isHome = request()->routeIs('home');
   $isCatalog = request()->routeIs('catalog') || request()->routeIs('courses.*');
   $isMyCourses = request()->routeIs('my.courses') || request()->routeIs('courses.access') || request()->routeIs('courses.pdf');
-  $isSummerClub = request()->routeIs('student.club-ete.*');
+  $isPublicSummerClub = request()->routeIs('club.ete');
+  $isStudentSummerClub = request()->routeIs('student.club-ete.*');
   $isCart = request()->routeIs('cart.*') || request()->routeIs('checkout');
 
   $cartCount = count(session('cart.items', []));
@@ -58,13 +59,17 @@
           {{ __('ui.nav.catalog') }}
         </a>
 
+        <a class="nav-link {{ $isPublicSummerClub ? 'is-active' : '' }}" href="{{ route('club.ete') }}">
+          Club d&#8217;&#233;t&#233;
+        </a>
+
         @auth
           <a class="nav-link {{ $isMyCourses ? 'is-active' : '' }}" href="{{ route('my.courses') }}">
             {{ __('ui.nav.my_courses') }}
           </a>
 
           @if($hasActiveSummerClubEnrollment)
-            <a class="nav-link {{ $isSummerClub ? 'is-active' : '' }}" href="{{ route('student.club-ete.catalogue') }}">
+            <a class="nav-link {{ $isStudentSummerClub ? 'is-active' : '' }}" href="{{ route('student.club-ete.catalogue') }}">
               Club d’été
             </a>
           @endif
@@ -167,13 +172,17 @@
           {{ __('ui.nav.catalog') }}
         </a>
 
+        <a class="mobile-link {{ $isPublicSummerClub ? 'is-active' : '' }}" href="{{ route('club.ete') }}" @click="open=false">
+          Club d&#8217;&#233;t&#233;
+        </a>
+
         @auth
           <a class="mobile-link {{ $isMyCourses ? 'is-active' : '' }}" href="{{ route('my.courses') }}" @click="open=false">
             {{ __('ui.nav.my_courses') }}
           </a>
 
           @if($hasActiveSummerClubEnrollment)
-            <a class="mobile-link {{ $isSummerClub ? 'is-active' : '' }}" href="{{ route('student.club-ete.catalogue') }}" @click="open=false">
+            <a class="mobile-link {{ $isStudentSummerClub ? 'is-active' : '' }}" href="{{ route('student.club-ete.catalogue') }}" @click="open=false">
               Club d’été
             </a>
           @endif
