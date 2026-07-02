@@ -1637,23 +1637,25 @@ html {
   margin-top: 32px;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 22px;
+  gap: 2rem;
+  align-items: stretch;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 768px) {
   .activities-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
   }
 }
 
-@media (min-width: 1180px) {
+@media (min-width: 1280px) {
   .activities-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 .activities-card {
+  width: 100%;
+  min-width: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1662,9 +1664,10 @@ html {
 }
 
 .activities-media {
-  height: 230px;
+  height: 260px;
   overflow: hidden;
   background: #073826;
+  flex: 0 0 auto;
 }
 
 .activities-media img {
