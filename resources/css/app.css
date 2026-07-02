@@ -1647,6 +1647,12 @@ html {
   }
 }
 
+@media (min-width: 1180px) {
+  .activities-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .activities-card {
   height: 100%;
   display: flex;

@@ -318,6 +318,34 @@
         border-color: rgba(212,176,86,.36);
         box-shadow: 0 14px 28px rgba(5,46,31,.22);
     }
+
+    .activities-card--islamic{
+        position: relative;
+        border-color: rgba(15,118,86,.38);
+        box-shadow:
+            0 28px 76px rgba(0,0,0,.25),
+            0 0 0 1px rgba(15,118,86,.13);
+    }
+
+    .activities-card--islamic::before{
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(15,118,86,.18), transparent 38%);
+        z-index: 1;
+    }
+
+    .activities-card--islamic > *{
+        position: relative;
+        z-index: 2;
+    }
+
+    .activities-card--islamic .btn-dark{
+        background: linear-gradient(135deg, #0b3b2e, #052e1f);
+        border-color: rgba(212,176,86,.34);
+        box-shadow: 0 14px 28px rgba(5,46,31,.22);
+    }
     .za-tracks{
     position: relative;
     overflow: hidden;
@@ -667,6 +695,29 @@
                     </div>
                 </div>
             </div>
+
+            <div class="za-programCard activities-card activities-card--islamic" data-reveal="delay-3">
+                <div class="activities-media">
+                    <img src="{{ asset('images/clubs/club-islamique-session-ete.jpeg') }}" alt="Club Islamique - Session Ete Arabe et Coran Zaytouna Academy" loading="lazy">
+                </div>
+
+                <div class="activities-body">
+                    <div class="activities-badgeRow">
+                        <span class="activities-badge">Session &#201;t&#233;</span>
+                        <span class="activities-seasonBadge">Arabe &amp; Coran</span>
+                    </div>
+                    <h3 class="activities-title">Club Islamique</h3>
+                    <p class="activities-text">
+                        Un programme estival en ligne pour apprendre l&#8217;Arabe, le Coran et les valeurs islamiques avec un suivi personnalis&#233;.
+                    </p>
+
+                    <div class="za-cardCta mt-4">
+                        <a class="btn-dark za-btnLg" href="{{ route('club.islamique') }}">
+                            D&#233;couvrir le programme
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -936,6 +987,7 @@
             </div>
         </div>
     </section>
+
 
     <!-- CTA -->
     <section class="za-section za-cta" data-reveal>

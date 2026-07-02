@@ -41,6 +41,9 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/refunds', [PageController::class, 'refunds'])->name('refunds');
 Route::get('/club-ete', [PageController::class, 'summerClub'])->name('club.ete');
+Route::get('/club-islamique', function () {
+    return view('club-islamique');
+})->name('club.islamique');
 Route::post('/club-ete/subscription-request', [SummerClubSubscriptionRequestController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('club-ete.subscription-request.store');
