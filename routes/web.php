@@ -158,11 +158,8 @@ Route::get('/_health/geo', function (\Illuminate\Http\Request $request) {
         'currency_source'   => session('app_currency_manual')
             ? 'manuel (/devise)'
             : (session('app_currency_resolved') ? 'géolocalisation' : 'défaut (TND)'),
-        'geo_headers'       => $geoHeaders,
+        'geo_headers'       => array_filter($geoHeaders),
         'server_geo_vars'   => $serverGeo,
-        'all_request_headers' => collect($request->headers->all())
-            ->map(fn ($v) => is_array($v) && count($v) === 1 ? $v[0] : $v)
-            ->all(),
     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 })->middleware('throttle:20,1')->name('health.geo');
 
