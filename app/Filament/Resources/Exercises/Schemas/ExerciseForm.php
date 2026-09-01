@@ -267,23 +267,18 @@ class ExerciseForm
                         ->helperText('Si activé, l’étudiant doit acheter l’exercice avant d’y accéder.'),
 
                     Forms\Components\TextInput::make('price_cents')
-                        ->label('Prix')
+                        ->label('Prix de base')
                         ->numeric()
                         ->default(0)
                         ->minValue(0)
                         ->suffix('centimes')
                         ->visible(fn ($get) => (bool) $get('is_paid'))
                         ->required(fn ($get) => (bool) $get('is_paid'))
-                        ->helperText('Exemple : 1990 = 19.90 TND.'),
+                        ->helperText('Exemple : 1990 = 19.90. Converti automatiquement pour les autres devises, sauf prix défini dans « Prix par marché ».'),
 
                     Forms\Components\Select::make('currency')
-                        ->label('Devise')
-                        ->options([
-                            'TND' => 'TND',
-                            'EUR' => 'EUR',
-                            'CAD' => 'CAD',
-                            'USD' => 'USD',
-                        ])
+                        ->label('Devise de base')
+                        ->options(collect(\App\Services\CurrencyService::SUPPORTED)->mapWithKeys(fn ($c) => [$c => $c])->all())
                         ->default('TND')
                         ->visible(fn ($get) => (bool) $get('is_paid'))
                         ->required(fn ($get) => (bool) $get('is_paid')),

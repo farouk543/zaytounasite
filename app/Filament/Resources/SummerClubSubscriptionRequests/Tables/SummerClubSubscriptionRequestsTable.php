@@ -47,7 +47,10 @@ class SummerClubSubscriptionRequestsTable
 
                 Tables\Columns\TextColumn::make('price')
                     ->label('Prix')
-                    ->money('TND')
+                    ->formatStateUsing(fn ($state, $record) => \App\Services\CurrencyService::format((float) $state, $record->currency ?? 'TND')
+                        . ($record->currency && $record->currency !== 'TND' && $record->base_price
+                            ? ' (' . \App\Services\CurrencyService::format((float) $record->base_price, 'TND') . ')'
+                            : ''))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')

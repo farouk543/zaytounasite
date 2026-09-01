@@ -49,7 +49,13 @@ class SummerClubSubscriptionRequestForm
                         ->disabled(),
 
                     Forms\Components\TextInput::make('price')
-                        ->label('Prix')
+                        ->label('Prix payé')
+                        ->suffix(fn ($record) => $record?->currency ?? 'TND')
+                        ->disabled(),
+
+                    Forms\Components\TextInput::make('base_price')
+                        ->label('Prix de référence (TND)')
+                        ->suffix('TND')
                         ->disabled(),
 
                     Forms\Components\CheckboxList::make('selected_subjects')

@@ -9,7 +9,7 @@
 
     $title = $course->title_i18n ?? $course->title_display ?? $course->title;
     $desc  = $course->description_i18n ?? $course->description_display ?? '';
-    $price = number_format(($course->price_cents ?? 0) / 100, 2);
+    $priceQuote = $priceQuote ?? app(\App\Services\PriceResolver::class)->resolve($course);
 
     $isPaid = (bool)($course->is_paid ?? true);
 
@@ -164,10 +164,13 @@
                 @if(!$isPaid)
                   {{ $t('ui.free', 'Gratuit') }}
                 @else
-                  {{ $price }} {{ $course->currency ?? 'TND' }}
+                  {{ $priceQuote->formattedWithHint() }}
                 @endif
               </div>
             </div>
+            @if($isPaid && $priceQuote->isEstimated)
+              <div class="mt-1 text-xs text-gray-500">{{ $t('ui.currency.estimated_note', 'Prix indicatif converti dans votre devise.') }}</div>
+            @endif
 
             <div class="mt-3 text-sm text-gray-600">
               ✅ {{ $t('ui.benefit_instant_access', 'Accès instantané après paiement') }}<br>

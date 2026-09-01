@@ -1,5 +1,7 @@
 @php
   $locale = app()->getLocale();
+  $currentCurrency = \App\Services\CurrencyService::current();
+  $supportedCurrencies = \App\Services\CurrencyService::SUPPORTED;
 
   $isHome = request()->routeIs('home');
   $isCatalog = request()->routeIs('catalog') || request()->routeIs('courses.*');
@@ -83,6 +85,19 @@
           <a href="{{ route('lang.switch', 'fr') }}" class="za-langLink {{ $locale === 'fr' ? 'is-active' : '' }}">FR</a>
           <a href="{{ route('lang.switch', 'en') }}" class="za-langLink {{ $locale === 'en' ? 'is-active' : '' }}">EN</a>
           <a href="{{ route('lang.switch', 'ar') }}" class="za-langLink {{ $locale === 'ar' ? 'is-active' : '' }}">AR</a>
+        </div>
+
+        {{-- Currency (DESKTOP only via CSS, shares .za-lang styling) --}}
+        <div class="za-lang za-cur" aria-label="{{ __('ui.currency.label') }}">
+          <select
+            class="za-curSelect"
+            onchange="if(this.value){window.location.href=this.value;}"
+            aria-label="{{ __('ui.currency.label') }}"
+          >
+            @foreach($supportedCurrencies as $cur)
+              <option value="{{ route('currency.switch', $cur) }}" @selected($cur === $currentCurrency)>{{ $cur }}</option>
+            @endforeach
+          </select>
         </div>
 
         @auth
@@ -209,6 +224,12 @@
           <a class="za-langLink {{ $locale === 'fr' ? 'is-active' : '' }}" href="{{ route('lang.switch', 'fr') }}">FR</a>
           <a class="za-langLink {{ $locale === 'en' ? 'is-active' : '' }}" href="{{ route('lang.switch', 'en') }}">EN</a>
           <a class="za-langLink {{ $locale === 'ar' ? 'is-active' : '' }}" href="{{ route('lang.switch', 'ar') }}">AR</a>
+        </div>
+
+        <div class="za-mobileLang za-mobileCur">
+          @foreach($supportedCurrencies as $cur)
+            <a class="za-langLink {{ $cur === $currentCurrency ? 'is-active' : '' }}" href="{{ route('currency.switch', $cur) }}">{{ $cur }}</a>
+          @endforeach
         </div>
 
         @guest

@@ -292,11 +292,11 @@ class CourseForm
                         ->disabled(fn () => !(auth()->user()?->can('courses.price') ?? false)),
 
                     Forms\Components\TextInput::make('price_cents')
-                        ->label('Prix')
+                        ->label('Prix de base')
                         ->numeric()
                         ->prefix('DT')
                         ->step(0.01)
-                        ->helperText('Exemple : 19.90 pour 19,90 DT')
+                        ->helperText('Prix de référence (devise de base). Converti automatiquement pour les autres devises, sauf si un prix est défini dans l\'onglet « Prix par marché ».')
                         ->afterStateHydrated(function ($state, $set) {
                             if (filled($state)) {
                                 $set('price_cents', number_format($state / 100, 2, '.', ''));

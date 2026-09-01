@@ -1,6 +1,11 @@
 <?php
 
 return [
+  'currency' => [
+    'label' => 'العملة',
+    'estimated_note' => 'سعر تقريبي محوّل إلى عملتك.',
+  ],
+
   'catalog' => 'الكتالوج',
   'catalog_subtitle' => 'ابحث وفلتر الدورات المنشورة.',
   'back_home' => 'العودة للرئيسية',

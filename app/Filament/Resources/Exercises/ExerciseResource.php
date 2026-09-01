@@ -43,6 +43,7 @@ class ExerciseResource extends Resource
     {
         return [
             ItemsRelationManager::class,
+            \App\Filament\RelationManagers\MarketPricesRelationManager::class,
         ];
     }
 

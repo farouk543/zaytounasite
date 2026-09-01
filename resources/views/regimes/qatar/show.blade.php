@@ -44,17 +44,12 @@
   $packs = $packs ?? [];
 
   // Currency conversion for visitor display
-  $visitorCurrency = $visitorCurrency ?? session('app_currency', 'TND');
-  $regimeCurrency  = 'QAR';
-  $showConversion  = $visitorCurrency !== $regimeCurrency;
-
-  // Rate: 1 QAR = X visitorCurrency
-  $ratesFromTnd     = CurrencyService::RATES_FROM_TND;
-  $qarToTnd         = 1 / ($ratesFromTnd['QAR'] ?? 1.18);  // 1 QAR -> TND
-  $tndToVisitor     = $ratesFromTnd[$visitorCurrency] ?? 1.0;
-  $convRate         = $qarToTnd * $tndToVisitor;  // 1 QAR -> visitor currency
-
-  $visitorSymbol    = CurrencyService::SYMBOLS[$visitorCurrency] ?? $visitorCurrency;
+  // Les prix sont déjà formatés dans la devise du visiteur par le contrôleur.
+  $visitorCurrency = $visitorCurrency ?? CurrencyService::current();
+  $regimeCurrency  = $regimeCurrency ?? 'QAR';
+  $showConversion  = false;
+  $showBillingNote = $visitorCurrency !== $regimeCurrency;
+  $visitorSymbol   = CurrencyService::SYMBOLS[$visitorCurrency] ?? $visitorCurrency;
 @endphp
 
 <section class="za-hero" aria-label="Regime">
@@ -250,9 +245,9 @@
         <p class="za-muted">{{ __('ui.regimes.packs_text') }}</p>
       </div>
 
-      @if($showConversion)
+      @if($showBillingNote)
         <div class="za-muted" style="margin-top:8px; font-size:.82rem; padding:8px 12px; background:rgba(16,185,129,.07); border-radius:12px; display:inline-block;">
-          Prix en QAR (Riyal qatari). Equivalent indicatif en {{ $visitorCurrency }} affiche sous chaque pack.
+          Prix affichés en {{ $visitorCurrency }}. La facturation finale peut être établie en {{ $regimeCurrency }}.
         </div>
       @endif
 

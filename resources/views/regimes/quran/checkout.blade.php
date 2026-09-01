@@ -6,10 +6,12 @@
 
   $trackName = $track->name_i18n ?? $track->name ?? '—';
 
+  $visCurrency = $visitorCurrency ?? \App\Services\CurrencyService::current();
+
   $packCatalog = [
     'individual' => [
       'title'    => __('ui.packs.individual_title'),
-      'price'    => '200 TND / mois',
+      'price'    => \App\Services\CurrencyService::formatPack('individual', $visCurrency),
       'badge'    => __('ui.packs.recommended_badge'),
       'features' => [
         __('ui.packs.individual_f1'),
@@ -19,7 +21,7 @@
     ],
     'duo' => [
       'title'    => __('ui.packs.duo_title'),
-      'price'    => '120 TND / mois',
+      'price'    => \App\Services\CurrencyService::formatPack('duo', $visCurrency),
       'badge'    => null,
       'features' => [
         __('ui.packs.duo_f1'),
@@ -29,7 +31,7 @@
     ],
     'group' => [
       'title'    => __('ui.packs.group_title'),
-      'price'    => '80 TND / mois',
+      'price'    => \App\Services\CurrencyService::formatPack('group', $visCurrency),
       'badge'    => null,
       'features' => [
         __('ui.packs.group_f1'),
@@ -39,7 +41,7 @@
     ],
     'recorded' => [
       'title'    => __('ui.packs.recorded_title'),
-      'price'    => '90 TND / trimestre',
+      'price'    => \App\Services\CurrencyService::formatPack('recorded', $visCurrency, 'quarterly'),
       'badge'    => null,
       'features' => [
         __('ui.packs.recorded_f1'),
@@ -68,7 +70,7 @@
   $items   = $selection['items'] ?? [];
   $maps    = $maps ?? ['levels'=>[]];
 
-  $currency = $pricing['currency'] ?? 'TND';
+  $currency = $pricing['currency'] ?? $visCurrency;
   $symbol   = \App\Services\CurrencyService::SYMBOLS[$currency] ?? $currency;
 
   $money = function($cents) use ($symbol) {

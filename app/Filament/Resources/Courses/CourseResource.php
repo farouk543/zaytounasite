@@ -41,6 +41,7 @@ class CourseResource extends Resource
     {
         return [
             \App\Filament\Resources\Courses\RelationManagers\PackItemsRelationManager::class,
+            \App\Filament\RelationManagers\MarketPricesRelationManager::class,
         ];
     }
 

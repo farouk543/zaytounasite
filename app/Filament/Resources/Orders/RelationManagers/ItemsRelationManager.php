@@ -33,6 +33,14 @@ class ItemsRelationManager extends RelationManager
                     ->formatStateUsing($fmt)
                     ->alignEnd(),
 
+                Tables\Columns\TextColumn::make('base_price_cents')
+                    ->label('Prix de base')
+                    ->formatStateUsing(fn (?int $cents, $record) => $cents === null
+                        ? '—'
+                        : number_format($cents / 100, 2) . ' ' . ($record->base_currency ?? '—'))
+                    ->alignEnd()
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ajouté le')
                     ->dateTime('Y-m-d H:i')

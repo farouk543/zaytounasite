@@ -116,8 +116,9 @@ class RegimeController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        // Devise forcée selon le régime
-        $visitorCurrency = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
+        // Devise du visiteur (géo-détection ou choix manuel), repli sur la devise du régime
+        $regimeCurrency  = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
+        $visitorCurrency = $this->visitorCurrencyFor($slug);
         $packs = $this->getPacksForTrack($slug, $visitorCurrency);
 
         $groupLabels = match ($slug) {
@@ -136,7 +137,6 @@ class RegimeController extends Controller
             ],
         };
 
-        $regimeCurrency = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
         $currencySymbol = CurrencyService::SYMBOLS[$visitorCurrency] ?? $visitorCurrency;
         $modePrices     = CurrencyService::modeHourPrices($visitorCurrency);
 
@@ -177,8 +177,8 @@ class RegimeController extends Controller
                     ->with('error', 'Ajoutez au moins une matière dans le pack personnalisé.');
             }
 
-            // Devise forcée selon le régime
-            $visitorCurrency = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
+            // Devise du visiteur (verrouillée dans la sélection ci-dessous)
+            $visitorCurrency = $this->visitorCurrencyFor($slug);
 
             $hourPrice = CurrencyService::packPrice('hour', $visitorCurrency);
             $discounts = ['monthly' => 0.00, 'quarterly' => 0.10, 'yearly' => 0.20];
@@ -380,8 +380,8 @@ class RegimeController extends Controller
         }
 
         $user     = $request->user();
-        $currency = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
         $isCustom = ($sel['pack'] ?? '') === 'custom';
+        $currency = $sel['pricing']['currency'] ?? $this->visitorCurrencyFor($slug);
 
         // For custom packs the total is computed; for classic packs it's TBD by admin
         $totalCents = $isCustom
@@ -454,9 +454,8 @@ class RegimeController extends Controller
             $maps['subjects'] = Subject::query()->whereIn('id', $subjectIds)->pluck('name', 'id')->all();
         }
 
-        // Devise forcée selon le régime
-        $visitorCurrency = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
         $regimeCurrency  = CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND';
+        $visitorCurrency = $sel['pricing']['currency'] ?? $this->visitorCurrencyFor($slug);
         $backRoute       = route("regimes.{$slug}.show");
 
         return view("regimes.{$slug}.checkout", [
@@ -483,6 +482,18 @@ class RegimeController extends Controller
             ->firstOrFail();
     }
 
+    /**
+     * Currency to display regime prices in: the visitor's currency when it
+     * comes from a real signal (manual pick or geolocation), otherwise the
+     * regime's own billing currency.
+     */
+    private function visitorCurrencyFor(string $slug): string
+    {
+        return CurrencyService::hasExplicitChoice()
+            ? CurrencyService::current()
+            : (CurrencyService::REGIME_CURRENCY[$slug] ?? 'TND');
+    }
+
     private function getPacksForTrack(string $slug, string $currency = 'TND'): array
     {
         $sym     = CurrencyService::SYMBOLS[$currency] ?? $currency;
@@ -498,6 +509,8 @@ class RegimeController extends Controller
                 'key' => 'individual',
                 'title' => 'Pack Individuel',
                 'price' => $indiv,
+                'price_amount' => CurrencyService::packPrice('individual', $currency),
+                'currency' => $currency,
                 'features' => ['Cours live 1 à 1', 'Planning flexible', 'Professeur dédié'],
                 'highlight' => true,
             ],
@@ -505,6 +518,8 @@ class RegimeController extends Controller
                 'key' => 'duo',
                 'title' => 'Pack Duo',
                 'price' => $duo,
+                'price_amount' => CurrencyService::packPrice('duo', $currency),
+                'currency' => $currency,
                 'features' => ['2 étudiants par professeur', 'Sessions live partagées', 'Suivi de progression'],
                 'highlight' => false,
             ],
@@ -512,6 +527,8 @@ class RegimeController extends Controller
                 'key' => 'group',
                 'title' => 'Pack Groupe',
                 'price' => $group,
+                'price_amount' => CurrencyService::packPrice('group', $currency),
+                'currency' => $currency,
                 'features' => ['Petit groupe (max 6)', 'Sessions planifiées', 'Support communauté'],
                 'highlight' => false,
             ],
@@ -519,6 +536,8 @@ class RegimeController extends Controller
                 'key' => 'recorded',
                 'title' => 'Contenu enregistré',
                 'price' => $rec,
+                'price_amount' => CurrencyService::packPrice('recorded', $currency),
+                'currency' => $currency,
                 'features' => ['Résumés de cours', 'Exercices corrigés', 'Sessions enregistrées', 'Corrections d\'examens'],
                 'highlight' => false,
             ],
@@ -526,6 +545,8 @@ class RegimeController extends Controller
                 'key' => 'custom',
                 'title' => 'Pack Personnalisé',
                 'price' => $custom,
+                'price_amount' => $hourAmt,
+                'currency' => $currency,
                 'features' => ['Plusieurs matières & classes', 'Séances 1h ou 2h', 'Mensuel / Trimestriel / Annuel (recommandé)'],
                 'highlight' => true,
             ],

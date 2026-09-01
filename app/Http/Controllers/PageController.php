@@ -62,10 +62,13 @@ class PageController extends Controller
             ->limit(4)
             ->get();
 
+        $currency = \App\Services\CurrencyService::current();
+
         return view('club-ete', [
             'resources' => $resources,
-            'packs' => SummerClubSubscriptionRequest::packDefinitions(),
+            'packs' => SummerClubSubscriptionRequest::packDefinitionsFor($currency),
             'subjects' => SummerClubSubscriptionRequest::subjects(),
+            'currency' => $currency,
         ]);
     }
 }

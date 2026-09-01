@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Exercise;
+use App\Services\CurrencyService;
+use App\Services\PriceResolver;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    public function __construct(private readonly PriceResolver $priceResolver)
+    {
+    }
+
     public function show(Request $request)
     {
         $items = $this->cartItemsDetailed($request);
@@ -114,6 +120,7 @@ class CartController extends Controller
             $courses = Course::query()
                 ->whereIn('id', $courseIds)
                 ->where('is_published', true)
+                ->with('prices')
                 ->get()
                 ->keyBy('id');
 
@@ -124,7 +131,8 @@ class CartController extends Controller
                     continue;
                 }
 
-                $priceCents = (int) ($course->price_cents ?? 0);
+                $quote = $this->priceResolver->resolve($course);
+                $priceCents = $quote->priceCents;
                 $qty = 1;
 
                 $items[] = [
@@ -136,7 +144,10 @@ class CartController extends Controller
                     'qty' => $qty,
                     'price_cents' => $priceCents,
                     'line_total_cents' => $priceCents * $qty,
-                    'currency' => $course->currency ?? 'TND',
+                    'currency' => $quote->currency,
+                    'base_price_cents' => $quote->baseCents,
+                    'base_currency' => $quote->baseCurrency,
+                    'is_estimated' => $quote->isEstimated,
                     'remove_route' => route('cart.remove', $course),
                 ];
             }
@@ -155,6 +166,7 @@ class CartController extends Controller
                 ->where('is_published', true)
                 ->whereNull('course_id')
                 ->whereNull('course_pack_item_id')
+                ->with('prices')
                 ->get()
                 ->keyBy('id');
 
@@ -165,7 +177,8 @@ class CartController extends Controller
                     continue;
                 }
 
-                $priceCents = (int) ($exercise->price_cents ?? 0);
+                $quote = $this->priceResolver->resolve($exercise);
+                $priceCents = $quote->priceCents;
                 $qty = 1;
 
                 $items[] = [
@@ -177,7 +190,10 @@ class CartController extends Controller
                     'qty' => $qty,
                     'price_cents' => $priceCents,
                     'line_total_cents' => $priceCents * $qty,
-                    'currency' => $exercise->currency ?? 'TND',
+                    'currency' => $quote->currency,
+                    'base_price_cents' => $quote->baseCents,
+                    'base_currency' => $quote->baseCurrency,
+                    'is_estimated' => $quote->isEstimated,
                     'remove_route' => route('cart.removeExercise', $exercise),
                 ];
             }
@@ -189,7 +205,7 @@ class CartController extends Controller
     private function cartTotals(array $items): array
     {
         $subtotal = 0;
-        $currency = 'TND';
+        $currency = CurrencyService::current();
 
         foreach ($items as $item) {
             $subtotal += (int) $item['line_total_cents'];

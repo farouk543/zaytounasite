@@ -210,10 +210,10 @@
                         <p class="summer-club-packFeature">{{ $pack['feature'] }}</p>
 
                         <div class="summer-club-priceLine">
-                            <span class="summer-club-price">{{ number_format($pack['price'], 0) }} DT</span>
+                            <span class="summer-club-price">{{ $pack['price_display'] }}</span>
                             @if($pack['old_price'])
-                                <span class="summer-club-oldPrice">{{ number_format($pack['old_price'], 0) }} DT</span>
-                                <span class="summer-club-saving">Économie {{ number_format($pack['old_price'] - $pack['price'], 0) }} DT</span>
+                                <span class="summer-club-oldPrice">{{ $pack['old_price_display'] }}</span>
+                                <span class="summer-club-saving">Économie {{ $pack['saving_display'] }}</span>
                             @endif
                         </div>
 
@@ -369,7 +369,7 @@
         form.reset();
         document.getElementById('summer-club-pack-key').value = packKey;
         document.getElementById('summer-club-modal-title').textContent = pack.name;
-        document.getElementById('summer-club-modal-meta').textContent = pack.price + ' DT · Durée : ' + pack.duration_months + ' mois';
+        document.getElementById('summer-club-modal-meta').textContent = pack.price_display + ' · Durée : ' + pack.duration_months + ' mois';
         document.getElementById('summer-club-form-message').textContent = '';
         document.getElementById('summer-club-form-message').className = 'summer-club-formMessage';
 

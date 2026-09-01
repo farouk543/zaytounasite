@@ -40,7 +40,7 @@
                 $trackName = $course->subject?->level?->track?->name_i18n ?? $course->subject?->level?->track?->name;
                 $subjectName = $course->subject?->name_i18n ?? $course->subject?->name;
 
-                $price = number_format(($course->price_cents ?? 0) / 100, 2);
+                $priceQuote = app(\App\Services\PriceResolver::class)->resolve($course);
 
                 $thumbUrl = $course->thumbnail_path
                   ? \Storage::disk('public')->url($course->thumbnail_path)
@@ -86,7 +86,7 @@
                         <x-badge variant="warning">{{ __('ui.enrollment.expired') }}</x-badge>
                       @endif
 
-                      <x-badge>{{ $price }} {{ $course->currency ?? 'TND' }}</x-badge>
+                      <x-badge>{{ $priceQuote->formattedWithHint() }}</x-badge>
 
                       @if($enrollment->access_ends_at)
                         <x-badge>

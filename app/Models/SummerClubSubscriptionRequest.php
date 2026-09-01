@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CurrencyService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
@@ -74,6 +75,8 @@ class SummerClubSubscriptionRequest extends Model
         'pack_name',
         'selected_subjects',
         'price',
+        'currency',
+        'base_price',
         'duration_months',
         'status',
         'admin_notes',
@@ -86,6 +89,7 @@ class SummerClubSubscriptionRequest extends Model
     protected $casts = [
         'selected_subjects' => 'array',
         'price' => 'decimal:2',
+        'base_price' => 'decimal:2',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
@@ -93,6 +97,53 @@ class SummerClubSubscriptionRequest extends Model
     public static function packDefinitions(): array
     {
         return self::PACKS;
+    }
+
+    /**
+     * Pack definitions with prices adapted to a market (same PPP rules as
+     * the regime packs). Adds: price/old_price (adapted ints), price_tnd,
+     * currency, price_display, old_price_display, saving_display.
+     */
+    public static function packDefinitionsFor(string $currency): array
+    {
+        $currency = strtoupper($currency);
+
+        return collect(self::PACKS)
+            ->map(function (array $pack) use ($currency) {
+                $priceTnd = (float) $pack['price'];
+                $oldTnd = $pack['old_price'] !== null ? (float) $pack['old_price'] : null;
+
+                $price = CurrencyService::marketAdaptedPrice($priceTnd, $currency);
+                $old = $oldTnd !== null ? CurrencyService::marketAdaptedPrice($oldTnd, $currency) : null;
+
+                $pack['price_tnd'] = $priceTnd;
+                $pack['price'] = $price;
+                $pack['old_price'] = $old;
+                $pack['currency'] = $currency;
+                $pack['price_display'] = CurrencyService::format($price, $currency);
+                $pack['old_price_display'] = $old !== null ? CurrencyService::format($old, $currency) : null;
+                $pack['saving_display'] = $old !== null ? CurrencyService::format($old - $price, $currency) : null;
+
+                return $pack;
+            })
+            ->all();
+    }
+
+    /**
+     * Price actually shown to a parent for a pack, in the given currency.
+     * Used to lock what they saw onto the subscription request.
+     */
+    public static function priceFor(string $packKey, string $currency): int
+    {
+        $pack = self::PACKS[$packKey] ?? null;
+
+        if (! $pack) {
+            throw ValidationException::withMessages([
+                'pack_key' => 'Pack Club d’été invalide.',
+            ]);
+        }
+
+        return CurrencyService::marketAdaptedPrice((float) $pack['price'], $currency);
     }
 
     public static function subjects(): array

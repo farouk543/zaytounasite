@@ -31,7 +31,7 @@
   $subjectName = $course->subject?->name_i18n ?? $course->subject?->name;
 
   $isPaid = (bool) ($course->is_paid ?? true);
-  $price = number_format((($course->price_cents ?? 0) / 100), 2);
+  $priceQuote = app(\App\Services\PriceResolver::class)->resolve($course);
   $isFeatured = (bool) ($course->is_featured ?? false);
   $enrolledCount = $course->enrollments_count ?? null;
   $durationLabel = $course->duration_label ?? null;
@@ -128,7 +128,7 @@
       @if(!$isPaid)
         <x-badge variant="success">{{ __('ui.free') }}</x-badge>
       @else
-        <x-badge>{{ $price }} {{ $course->currency ?? 'TND' }}</x-badge>
+        <x-badge>{{ $priceQuote->formattedWithHint() }}</x-badge>
       @endif
     </div>
 

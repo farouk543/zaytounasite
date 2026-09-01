@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SummerClubSubscriptionRequest;
+use App\Services\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -29,6 +30,10 @@ class SummerClubSubscriptionRequestController extends Controller
             $validated['selected_subjects'] ?? []
         );
 
+        // Lock the price + currency the parent actually saw.
+        $currency = CurrencyService::current();
+        $price = SummerClubSubscriptionRequest::priceFor($validated['pack_key'], $currency);
+
         SummerClubSubscriptionRequest::create([
             'user_id' => $request->user()?->id,
             'parent_name' => $validated['parent_name'],
@@ -38,7 +43,9 @@ class SummerClubSubscriptionRequestController extends Controller
             'pack_key' => $validated['pack_key'],
             'pack_name' => $pack['name'],
             'selected_subjects' => $selectedSubjects,
-            'price' => $pack['price'],
+            'price' => $price,
+            'currency' => $currency,
+            'base_price' => $pack['price'],
             'duration_months' => $pack['duration_months'],
             'status' => 'pending',
         ]);

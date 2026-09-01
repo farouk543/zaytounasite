@@ -8,10 +8,15 @@ use App\Models\Exercise;
 use App\Models\Level;
 use App\Models\Subject;
 use App\Models\Track;
+use App\Services\PriceResolver;
 use Illuminate\Http\Request;
 
 class CatalogController extends Controller
 {
+    public function __construct(private readonly PriceResolver $priceResolver)
+    {
+    }
+
     public function home()
     {
         return view('welcome');
@@ -101,7 +106,7 @@ class CatalogController extends Controller
             ->where('is_published', true)
             ->whereDoesntHave('includedInPackItems')
             ->withCount('enrollments')
-            ->with(['subject.branch.level.track', 'subject.level.track'])
+            ->with(['subject.branch.level.track', 'subject.level.track', 'prices'])
             ->when($type === 'exercise', function ($query) {
                 $query->whereRaw('1 = 0');
             })
@@ -161,6 +166,7 @@ class CatalogController extends Controller
 
         $exercisesQuery = Exercise::query()
             ->where('is_published', true)
+            ->with('prices')
             ->whereNull('course_id')
             ->whereNull('course_pack_item_id')
             ->when(! in_array($type, ['', 'exercise'], true), function ($query) {
@@ -213,6 +219,14 @@ class CatalogController extends Controller
                 ->get();
         }
 
+        // Course cards resolve their own price (prices relation is eager-loaded above).
+        // Exercise cards are rendered inline here, so pre-resolve their quotes.
+        $exercisePriceQuotes = $this->priceResolver->resolveMany(
+            $exercises instanceof \Illuminate\Contracts\Pagination\Paginator
+                ? $exercises->getCollection()
+                : $exercises
+        );
+
         return view('catalog.index', compact(
             'tracks',
             'levels',
@@ -220,7 +234,8 @@ class CatalogController extends Controller
             'subjects',
             'courses',
             'exercises',
-            'levelHasBranches'
+            'levelHasBranches',
+            'exercisePriceQuotes'
         ));
     }
 
@@ -239,8 +254,10 @@ class CatalogController extends Controller
             }
         }
 
-        $course->load(['subject.branch.level.track', 'subject.level.track']);
+        $course->load(['subject.branch.level.track', 'subject.level.track', 'prices']);
         $course->loadCount('enrollments');
+
+        $priceQuote = $this->priceResolver->resolve($course);
 
         $user = $request->user();
         $isPaid = (bool) ($course->is_paid ?? true);
@@ -268,6 +285,6 @@ class CatalogController extends Controller
             ->limit(4)
             ->get();
 
-        return view('courses.show', compact('course', 'isPaid', 'hasAccess', 'inCart', 'relatedCourses'));
+        return view('courses.show', compact('course', 'isPaid', 'hasAccess', 'inCart', 'relatedCourses', 'priceQuote'));
     }
 }

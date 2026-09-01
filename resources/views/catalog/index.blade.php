@@ -149,9 +149,9 @@
             $difficultyLabel = $difficultyLabels[$exercise->difficulty] ?? null;
 
             $isPaid = (bool) ($exercise->is_paid ?? true);
-            $priceCents = (int) ($exercise->price_cents ?? 0);
-            $currency = $exercise->currency ?? 'TND';
-            $formattedPrice = number_format($priceCents / 100, 2) . ' ' . $currency;
+            $exerciseQuote = ($exercisePriceQuotes[$exercise->id] ?? null)
+                ?: app(\App\Services\PriceResolver::class)->resolve($exercise);
+            $formattedPrice = $exerciseQuote->formattedWithHint();
 
             $hasExerciseAccess = ! $isPaid
                 || ($user && method_exists($user, 'hasActiveEnrollmentForExercise') && $user->hasActiveEnrollmentForExercise($exercise->id));

@@ -8,11 +8,17 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\ManualOrderPending;
+use App\Services\CurrencyService;
+use App\Services\PriceResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
+    public function __construct(private readonly PriceResolver $priceResolver)
+    {
+    }
+
     public function checkout(Request $request)
     {
         // Redirige vers le flux manuel (admin approval requis)
@@ -35,14 +41,22 @@ class CheckoutController extends Controller
         $courses = Course::query()
             ->whereIn('id', $courseIds)
             ->where('is_published', true)
+            ->with('prices')
             ->get();
 
         abort_if($courses->isEmpty(), 400, 'No valid courses');
 
-        $order = DB::transaction(function () use ($user, $courses) {
+        // Devise vue par le client au moment du checkout — on la verrouille.
+        $currency = CurrencyService::current();
 
-            $currency = $courses->first()->currency ?? 'TND';
-            $subtotal = $courses->sum(fn ($c) => (int) ($c->price_cents ?? 0));
+        $quotes = [];
+        foreach ($courses as $c) {
+            $quotes[$c->id] = $this->priceResolver->resolve($c, $currency);
+        }
+
+        $order = DB::transaction(function () use ($user, $courses, $currency, $quotes) {
+
+            $subtotal = array_sum(array_map(fn ($q) => $q->priceCents, $quotes));
 
             $order = Order::create([
                 'user_id'        => $user->id,
@@ -54,11 +68,16 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($courses as $c) {
+                $quote = $quotes[$c->id];
+
                 OrderItem::create([
                     'order_id'         => $order->id,
                     'course_id'        => $c->id,
-                    'unit_price_cents' => (int) ($c->price_cents ?? 0),
+                    'unit_price_cents' => $quote->priceCents,
                     'qty'              => 1,
+                    'currency'         => $quote->currency,
+                    'base_price_cents' => $quote->baseCents,
+                    'base_currency'    => $quote->baseCurrency,
                 ]);
             }
 
@@ -68,7 +87,11 @@ class CheckoutController extends Controller
                 'status'           => 'pending',
                 'transaction_id'   => null,
                 'payment_url'      => null,
-                'provider_payload' => ['mode' => 'manual', 'currency' => $currency],
+                'provider_payload' => [
+                    'mode'     => 'manual',
+                    'currency' => $currency,
+                    'lines'    => array_map(fn ($q) => $q->toArray(), $quotes),
+                ],
             ]);
 
             session()->forget('cart.items');

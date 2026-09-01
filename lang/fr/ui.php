@@ -1,6 +1,11 @@
 <?php
 
 return [
+  'currency' => [
+    'label' => 'Devise',
+    'estimated_note' => 'Prix indicatif converti dans votre devise.',
+  ],
+
   'catalog' => 'Catalogue',
   'catalog_subtitle' => 'Rechercher et filtrer les cours publiés.',
   'back_home' => 'Retour à l\'accueil',

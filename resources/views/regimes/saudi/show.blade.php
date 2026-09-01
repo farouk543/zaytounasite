@@ -45,16 +45,12 @@
   $packs = $packs ?? [];
 
   // Currency conversion for visitor display
-  $visitorCurrency = $visitorCurrency ?? session('app_currency', 'TND');
-  $regimeCurrency  = 'SAR';
-  $showConversion  = $visitorCurrency !== $regimeCurrency;
-
-  $ratesFromTnd  = CurrencyService::RATES_FROM_TND;
-  $sarToTnd      = 1 / ($ratesFromTnd['SAR'] ?? 1.18);
-  $tndToVisitor  = $ratesFromTnd[$visitorCurrency] ?? 1.0;
-  $convRate      = $sarToTnd * $tndToVisitor;
-
-  $visitorSymbol = CurrencyService::SYMBOLS[$visitorCurrency] ?? $visitorCurrency;
+  // Les prix sont déjà formatés dans la devise du visiteur par le contrôleur.
+  $visitorCurrency = $visitorCurrency ?? CurrencyService::current();
+  $regimeCurrency  = $regimeCurrency ?? 'SAR';
+  $showConversion  = false;
+  $showBillingNote = $visitorCurrency !== $regimeCurrency;
+  $visitorSymbol   = CurrencyService::SYMBOLS[$visitorCurrency] ?? $visitorCurrency;
 @endphp
 
 <section class="za-hero" aria-label="Regime">
@@ -250,9 +246,9 @@
         <p class="za-muted">{{ __('ui.regimes.packs_text') }}</p>
       </div>
 
-      @if($showConversion)
+      @if($showBillingNote)
         <div class="za-muted" style="margin-top:8px; font-size:.82rem; padding:8px 12px; background:rgba(16,185,129,.07); border-radius:12px; display:inline-block;">
-          Prix en SAR (Riyal saoudien). Equivalent indicatif en {{ $visitorCurrency }} affiche sous chaque pack.
+          Prix affichés en {{ $visitorCurrency }}. La facturation finale peut être établie en {{ $regimeCurrency }}.
         </div>
       @endif
 

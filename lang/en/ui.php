@@ -1,6 +1,11 @@
 <?php
 
 return [
+  'currency' => [
+    'label' => 'Currency',
+    'estimated_note' => 'Indicative price converted to your currency.',
+  ],
+
   'catalog' => 'Catalog',
   'catalog_subtitle' => 'Search and filter published courses.',
   'back_home' => 'Back to Home',

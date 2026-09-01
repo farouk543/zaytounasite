@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Concerns\HasMarketPrices;
 use App\Models\CoursePackItem;
 use App\Models\Enrollment;
 
 class Course extends Model
 {
+    use HasMarketPrices;
+
     protected $fillable = [
         'subject_id',
 

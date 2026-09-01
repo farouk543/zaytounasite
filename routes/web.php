@@ -101,6 +101,52 @@ Route::get('/lang/{locale}', function (string $locale) {
 
 /*
 |--------------------------------------------------------------------------
+| Currency switch (manual override of geo-detection)
+|--------------------------------------------------------------------------
+*/
+Route::get('/devise/{code}', function (string $code) {
+    $code = strtoupper($code);
+
+    if (! \App\Services\CurrencyService::isSupported($code)) {
+        abort(400);
+    }
+
+    session([
+        'app_currency'        => $code,
+        'app_currency_manual' => true,
+    ]);
+
+    $previous = url()->previous();
+
+    $safe = str_starts_with($previous, config('app.url'))
+        ? $previous
+        : route('home');
+
+    return redirect()->to($safe);
+})->middleware('throttle:30,1')->name('currency.switch');
+
+/*
+|--------------------------------------------------------------------------
+| Diagnostic géolocalisation Cloudflare
+|--------------------------------------------------------------------------
+| Ne renvoie que des infos sur la requête courante (aucune donnée sensible).
+| Sert à vérifier que Cloudflare injecte bien l'en-tête CF-IPCountry.
+*/
+Route::get('/_health/geo', function (\Illuminate\Http\Request $request) {
+    return response()->json([
+        'via_cloudflare'    => $request->hasHeader('CF-Ray'),
+        'cf_ip_country'     => $request->header('CF-IPCountry'),
+        'cf_ray'            => $request->header('CF-Ray'),
+        'accept_language'   => $request->header('Accept-Language'),
+        'detected_currency' => \App\Services\CurrencyService::current(),
+        'currency_source'   => session('app_currency_manual')
+            ? 'manuel (/devise)'
+            : (session('app_currency_resolved') ? 'géolocalisation Cloudflare' : 'défaut (TND)'),
+    ]);
+})->middleware('throttle:20,1')->name('health.geo');
+
+/*
+|--------------------------------------------------------------------------
 | Dashboard
 |--------------------------------------------------------------------------
 */

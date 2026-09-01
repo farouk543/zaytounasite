@@ -12,10 +12,14 @@ class OrderItem extends Model
         'course_id',
         'unit_price_cents',
         'qty',
+        'currency',
+        'base_price_cents',
+        'base_currency',
     ];
 
     protected $casts = [
         'unit_price_cents' => 'integer',
+        'base_price_cents' => 'integer',
         'qty' => 'integer',
     ];
 
