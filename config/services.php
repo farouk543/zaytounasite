@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    /*
+    | Server-side IP → country lookup, used by DetectCurrency when no proxy
+    | geolocation header (CF-IPCountry, …) is present. Free, keyless provider
+    | by default; results are cached per IP. Set GEOIP_LOOKUP_ENABLED=false
+    | to disable and rely on the proxy header + manual currency switch only.
+    */
+    'geoip' => [
+        'enabled' => env('GEOIP_LOOKUP_ENABLED', true),
+        'endpoint' => env('GEOIP_LOOKUP_ENDPOINT', 'https://ipwho.is/{ip}'),
+        'country_path' => env('GEOIP_LOOKUP_COUNTRY_PATH', 'country_code'),
+        'timeout' => (float) env('GEOIP_LOOKUP_TIMEOUT', 1.5),
+        'cache_days' => (int) env('GEOIP_LOOKUP_CACHE_DAYS', 30),
+    ],
+
 ];
