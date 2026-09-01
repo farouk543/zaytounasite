@@ -877,85 +877,30 @@
         </div>
 
         <div class="za-tracksGrid">
-            <a href="{{ route('regimes.tunisia.show') }}"
-               class="za-trackCard"
-               data-reveal="delay-1"
-               aria-label="{{ __('ui.home.track_tunisia') }}">
-                <div class="za-trackMedia">
-                    <img src="{{ asset('images/tunisie.png') }}"
-                         alt="{{ __('ui.home.track_tunisia') }}"
-                         loading="lazy">
-                </div>
-                <div class="za-trackBody">
-                    <h3 class="za-trackName">{{ __('ui.home.track_tunisia') }}</h3>
-                    <p class="za-trackText">{{ __('ui.home.track_tunisia_text') }}</p>
-                    <span class="za-trackBtn">{{ __('ui.view') }}</span>
-                </div>
-            </a>
+            @php
+              $homeTracks = [
+                ['route' => route('regimes.tunisia.show'), 'img' => asset('images/tunisie.png'),  'name' => __('ui.home.track_tunisia'), 'text' => __('ui.home.track_tunisia_text')],
+                ['route' => route('regimes.france.show'),  'img' => asset('images/france.jpg'),    'name' => __('ui.home.track_france'),  'text' => __('ui.home.track_france_text')],
+                ['route' => route('regimes.qatar.show'),   'img' => asset('images/qatar.png'),     'name' => __('ui.home.track_qatar'),   'text' => __('ui.home.track_qatar_text')],
+                ['route' => route('regimes.quran.show'),   'img' => asset('images/Quran.png'),     'name' => __('ui.home.track_quran'),   'text' => __('ui.home.track_quran_text')],
+              ];
+            @endphp
 
-            <a href="{{ route('regimes.qatar.show') }}"
-               class="za-trackCard"
-               data-reveal="delay-2"
-               aria-label="{{ __('ui.home.track_qatar') }}">
-                <div class="za-trackMedia">
-                    <img src="{{ asset('images/qatar.png') }}"
-                         alt="{{ __('ui.home.track_qatar') }}"
-                         loading="lazy">
-                </div>
-                <div class="za-trackBody">
-                    <h3 class="za-trackName">{{ __('ui.home.track_qatar') }}</h3>
-                    <p class="za-trackText">{{ __('ui.home.track_qatar_text') }}</p>
-                    <span class="za-trackBtn">{{ __('ui.view') }}</span>
-                </div>
-            </a>
-
-            <a href="{{ route('regimes.saudi.show') }}"
-               class="za-trackCard"
-               data-reveal="delay-3"
-               aria-label="{{ __('ui.home.track_saudi') }}">
-                <div class="za-trackMedia">
-                    <img src="{{ asset('images/saudite.png') }}"
-                         alt="{{ __('ui.home.track_saudi') }}"
-                         loading="lazy">
-                </div>
-                <div class="za-trackBody">
-                    <h3 class="za-trackName">{{ __('ui.home.track_saudi') }}</h3>
-                    <p class="za-trackText">{{ __('ui.home.track_saudi_text') }}</p>
-                    <span class="za-trackBtn">{{ __('ui.view') }}</span>
-                </div>
-            </a>
-
-            <a href="{{ route('regimes.quran.show') }}"
-               class="za-trackCard"
-               data-reveal="delay-4"
-               aria-label="{{ __('ui.home.track_quran') }}">
-                <div class="za-trackMedia">
-                    <img src="{{ asset('images/Quran.png') }}"
-                         alt="{{ __('ui.home.track_quran') }}"
-                         loading="lazy">
-                </div>
-                <div class="za-trackBody">
-                    <h3 class="za-trackName">{{ __('ui.home.track_quran') }}</h3>
-                    <p class="za-trackText">{{ __('ui.home.track_quran_text') }}</p>
-                    <span class="za-trackBtn">{{ __('ui.view') }}</span>
-                </div>
-            </a>
-
-            <a href="{{ route('regimes.france.show') }}"
-               class="za-trackCard"
-               data-reveal="delay-4"
-               aria-label="{{ __('ui.home.track_france') }}">
-                <div class="za-trackMedia">
-                    <img src="{{ asset('images/france.jpg') }}"
-                         alt="{{ __('ui.home.track_france') }}"
-                         loading="lazy">
-                </div>
-                <div class="za-trackBody">
-                    <h3 class="za-trackName">{{ __('ui.home.track_france') }}</h3>
-                    <p class="za-trackText">{{ __('ui.home.track_france_text') }}</p>
-                    <span class="za-trackBtn">{{ __('ui.view') }}</span>
-                </div>
-            </a>
+            @foreach($homeTracks as $i => $tk)
+              <a href="{{ $tk['route'] }}"
+                 class="za-trackCard"
+                 data-reveal="delay-{{ $i + 1 }}"
+                 aria-label="{{ $tk['name'] }}">
+                  <div class="za-trackMedia">
+                      <img src="{{ $tk['img'] }}" alt="{{ $tk['name'] }}" loading="lazy">
+                  </div>
+                  <div class="za-trackBody">
+                      <h3 class="za-trackName">{{ $tk['name'] }}</h3>
+                      <p class="za-trackText">{{ $tk['text'] }}</p>
+                      <span class="za-trackBtn">{{ __('ui.view') }}</span>
+                  </div>
+              </a>
+            @endforeach
         </div>
 
         <div class="za-tracksFooter" data-reveal="delay-2">
