@@ -61,6 +61,7 @@
         ['🇶🇦', __('ui.pages.about.offer_qa_title'), __('ui.pages.about.offer_qa_desc'), route('regimes.qatar.show')],
         ['🇸🇦', __('ui.pages.about.offer_sa_title'), __('ui.pages.about.offer_sa_desc'), route('regimes.saudi.show')],
         ['📖',   __('ui.pages.about.offer_qr_title'), __('ui.pages.about.offer_qr_desc'), route('regimes.quran.show')],
+        ['🇫🇷', __('ui.pages.about.offer_fr_title'), __('ui.pages.about.offer_fr_desc'), route('regimes.france.show')],
       ] as [$flag, $title, $desc, $url])
       <a href="{{ $url }}" class="lux-card" style="padding:24px; text-align:center; text-decoration:none; display:block; transition:transform .2s;" data-reveal>
         <div style="font-size:30px; margin-bottom:10px;">{{ $flag }}</div>

@@ -244,5 +244,149 @@ class SubjectSeeder extends Seeder
                 }
             }
         }
+
+        $this->seedFrance();
+    }
+
+    /**
+     * Régime France : système éducatif français, sans séries/branches
+     * (réforme du lycée 2019). Matières par niveau, branch_id = null.
+     * Sources : education.gouv.fr / éduscol / Onisep.
+     */
+    private function seedFrance(): void
+    {
+        $france = Track::where('slug', 'france')->first();
+        if (! $france) return;
+
+        $levels = Level::where('track_id', $france->id)->get()->keyBy('slug');
+
+        // Enseignements de spécialité (Première, Terminale, Bac)
+        $specialites = [
+            ['slug' => 'spe-mathematiques',   'name' => 'Spécialité Mathématiques'],
+            ['slug' => 'spe-physique-chimie', 'name' => 'Spécialité Physique-Chimie'],
+            ['slug' => 'spe-svt',             'name' => 'Spécialité Sciences de la vie et de la Terre'],
+            ['slug' => 'spe-ses',             'name' => 'Spécialité Sciences économiques et sociales'],
+            ['slug' => 'spe-hlp',             'name' => 'Spécialité Humanités, littérature et philosophie'],
+            ['slug' => 'spe-hggsp',           'name' => 'Spécialité Histoire-géo, géopolitique et sciences politiques'],
+            ['slug' => 'spe-nsi',             'name' => 'Spécialité Numérique et sciences informatiques'],
+            ['slug' => 'spe-llcer',           'name' => 'Spécialité LLCER (Anglais)'],
+            ['slug' => 'spe-si',              'name' => 'Spécialité Sciences de l\'ingénieur'],
+            ['slug' => 'spe-arts',            'name' => 'Spécialité Arts'],
+        ];
+
+        $primaire = [
+            ['slug' => 'francais',              'name' => 'Français'],
+            ['slug' => 'mathematiques',         'name' => 'Mathématiques'],
+            ['slug' => 'sciences-technologie',  'name' => 'Sciences et technologie'],
+            ['slug' => 'histoire-geographie',   'name' => 'Histoire-Géographie'],
+            ['slug' => 'emc',                   'name' => 'Enseignement moral et civique'],
+            ['slug' => 'anglais',               'name' => 'Anglais'],
+            ['slug' => 'arts-plastiques',       'name' => 'Arts plastiques'],
+            ['slug' => 'education-musicale',    'name' => 'Éducation musicale'],
+            ['slug' => 'eps',                   'name' => 'Éducation physique et sportive'],
+        ];
+
+        $sixieme = [
+            ['slug' => 'francais',                'name' => 'Français'],
+            ['slug' => 'mathematiques',           'name' => 'Mathématiques'],
+            ['slug' => 'histoire-geographie-emc', 'name' => 'Histoire-Géographie-EMC'],
+            ['slug' => 'anglais-lv1',             'name' => 'Anglais (LV1)'],
+            ['slug' => 'sciences-technologie',    'name' => 'Sciences et technologie'],
+            ['slug' => 'arts-plastiques',         'name' => 'Arts plastiques'],
+            ['slug' => 'education-musicale',      'name' => 'Éducation musicale'],
+            ['slug' => 'eps',                     'name' => 'Éducation physique et sportive'],
+        ];
+
+        $cycle4 = [
+            ['slug' => 'francais',                'name' => 'Français'],
+            ['slug' => 'mathematiques',           'name' => 'Mathématiques'],
+            ['slug' => 'histoire-geographie-emc', 'name' => 'Histoire-Géographie-EMC'],
+            ['slug' => 'anglais-lv1',             'name' => 'Anglais (LV1)'],
+            ['slug' => 'lv2',                     'name' => 'Langue vivante 2'],
+            ['slug' => 'svt',                     'name' => 'Sciences de la vie et de la Terre'],
+            ['slug' => 'physique-chimie',         'name' => 'Physique-Chimie'],
+            ['slug' => 'technologie',             'name' => 'Technologie'],
+            ['slug' => 'arts-plastiques',         'name' => 'Arts plastiques'],
+            ['slug' => 'education-musicale',      'name' => 'Éducation musicale'],
+            ['slug' => 'eps',                     'name' => 'Éducation physique et sportive'],
+        ];
+
+        $seconde = [
+            ['slug' => 'francais',           'name' => 'Français'],
+            ['slug' => 'mathematiques',      'name' => 'Mathématiques'],
+            ['slug' => 'histoire-geographie', 'name' => 'Histoire-Géographie'],
+            ['slug' => 'lva-anglais',        'name' => 'LVA (Anglais)'],
+            ['slug' => 'lvb',                'name' => 'LVB'],
+            ['slug' => 'ses',                'name' => 'Sciences économiques et sociales'],
+            ['slug' => 'svt',                'name' => 'Sciences de la vie et de la Terre'],
+            ['slug' => 'physique-chimie',    'name' => 'Physique-Chimie'],
+            ['slug' => 'snt',                'name' => 'Sciences numériques et technologie'],
+            ['slug' => 'eps',                'name' => 'Éducation physique et sportive'],
+            ['slug' => 'emc',                'name' => 'Enseignement moral et civique'],
+        ];
+
+        $premiereTC = [
+            ['slug' => 'francais',                  'name' => 'Français'],
+            ['slug' => 'histoire-geographie',       'name' => 'Histoire-Géographie'],
+            ['slug' => 'lva-anglais',               'name' => 'LVA (Anglais)'],
+            ['slug' => 'lvb',                       'name' => 'LVB'],
+            ['slug' => 'enseignement-scientifique', 'name' => 'Enseignement scientifique'],
+            ['slug' => 'eps',                       'name' => 'Éducation physique et sportive'],
+            ['slug' => 'emc',                       'name' => 'Enseignement moral et civique'],
+        ];
+
+        $terminaleTC = [
+            ['slug' => 'philosophie',               'name' => 'Philosophie'],
+            ['slug' => 'histoire-geographie',       'name' => 'Histoire-Géographie'],
+            ['slug' => 'lva-anglais',               'name' => 'LVA (Anglais)'],
+            ['slug' => 'lvb',                       'name' => 'LVB'],
+            ['slug' => 'enseignement-scientifique', 'name' => 'Enseignement scientifique'],
+            ['slug' => 'eps',                       'name' => 'Éducation physique et sportive'],
+            ['slug' => 'emc',                       'name' => 'Enseignement moral et civique'],
+        ];
+
+        $bac = array_merge([
+            ['slug' => 'francais',    'name' => 'Français (épreuve anticipée)'],
+            ['slug' => 'philosophie', 'name' => 'Philosophie'],
+            ['slug' => 'grand-oral',  'name' => 'Grand oral'],
+        ], $specialites);
+
+        $data = [
+            'primary-1' => $primaire,
+            'primary-2' => $primaire,
+            'primary-3' => $primaire,
+            'primary-4' => $primaire,
+            'primary-5' => $primaire,
+            'middle-6'  => $sixieme,
+            'middle-7'  => $cycle4,
+            'middle-8'  => $cycle4,
+            'middle-9'  => $cycle4,
+            'lycee-10'  => $seconde,
+            'lycee-11'  => array_merge($premiereTC, $specialites),
+            'lycee-12'  => array_merge($terminaleTC, $specialites),
+            'baccalaureat' => $bac,
+        ];
+
+        foreach ($data as $levelSlug => $subjects) {
+            $level = $levels->get($levelSlug);
+            if (! $level) continue;
+
+            $order = 1;
+            foreach ($subjects as $s) {
+                Subject::updateOrCreate(
+                    [
+                        'level_id'  => $level->id,
+                        'branch_id' => null,
+                        'slug'      => $s['slug'],
+                    ],
+                    [
+                        'name'       => $s['name'],
+                        'name_ar'    => null,
+                        'is_active'  => true,
+                        'sort_order' => $order++,
+                    ]
+                );
+            }
+        }
     }
 }

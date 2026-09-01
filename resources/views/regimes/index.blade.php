@@ -10,6 +10,7 @@
             ['key' => 'qatar', 'label' => __('ui.regimes_index.filters.qatar')],
             ['key' => 'saudi', 'label' => __('ui.regimes_index.filters.saudi')],
             ['key' => 'quran', 'label' => __('ui.regimes_index.filters.quran')],
+            ['key' => 'france', 'label' => __('ui.regimes_index.filters.france')],
         ],
     ];
 @endphp

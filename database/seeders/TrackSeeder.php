@@ -14,6 +14,7 @@ class TrackSeeder extends Seeder
             ['slug' => 'qatar', 'name' => 'Qatar', 'name_ar' => 'قطر', 'sort_order' => 2],
             ['slug' => 'saudi', 'name' => 'Saudi Arabia', 'name_ar' => 'السعودية', 'sort_order' => 3],
             ['slug' => 'quran', 'name' => 'Quran', 'name_ar' => 'القرآن الكريم', 'sort_order' => 4],
+            ['slug' => 'france', 'name' => 'France', 'name_ar' => 'فرنسا', 'sort_order' => 5],
         ];
 
         foreach ($tracks as $t) {

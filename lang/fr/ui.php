@@ -125,6 +125,8 @@ return [
     'track_saudi_text' => 'Découvrez le parcours d\'apprentissage saoudien.',
     'track_quran' => 'Coran',
     'track_quran_text' => 'Écoutez, lisez et explorez le contenu coranique.',
+    'track_france' => 'France',
+    'track_france_text' => 'Suivez le programme scolaire français, de la primaire au baccalauréat.',
     'see_all_systems' => 'Voir tous les systèmes',
 
     'curated_pill' => 'Cours sélectionnés',
@@ -488,6 +490,7 @@ return [
     'qatar_title' => 'Programme qatarien',
     'saudi_title' => 'Programme saoudien',
     'quran_title' => 'Programme coranique',
+    'france_title' => 'Programme français',
     'default_title' => 'Programme éducatif',
 
     'hero_text_line1' => 'Choisissez le niveau, la classe et la matière.',
@@ -744,6 +747,7 @@ return [
       'qatar' => 'Qatar',
       'saudi' => 'Arabie Saoudite',
       'quran' => 'Coran',
+      'france' => 'France',
     ],
   ],
 
@@ -752,6 +756,7 @@ return [
     'qatar_text' => 'Explorez le système éducatif qatarien.',
     'saudi_text' => 'Découvrez le parcours d\'apprentissage saoudien.',
     'quran_text' => 'Écoutez, lisez et explorez le contenu coranique.',
+    'france_text' => 'Suivez le programme scolaire français, de l\'école primaire au baccalauréat.',
   ],
 
   'pages' => [
@@ -802,6 +807,8 @@ return [
       'offer_sa_desc'  => 'Primaire, collège et lycée selon le programme saoudien.',
       'offer_qr_title' => 'Coran et sciences islamiques',
       'offer_qr_desc'  => 'Débutant, tajwid, mémorisation, tafsir.',
+      'offer_fr_title' => 'Programme français',
+      'offer_fr_desc'  => 'De la primaire au baccalauréat.',
       'values_pill'    => 'Nos valeurs',
       'values_title'   => 'Ce qui nous guide',
       'val1_title'     => 'Excellence',

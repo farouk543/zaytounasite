@@ -940,6 +940,22 @@
                     <span class="za-trackBtn">{{ __('ui.view') }}</span>
                 </div>
             </a>
+
+            <a href="{{ route('regimes.france.show') }}"
+               class="za-trackCard"
+               data-reveal="delay-4"
+               aria-label="{{ __('ui.home.track_france') }}">
+                <div class="za-trackMedia">
+                    <img src="{{ asset('images/france.jpg') }}"
+                         alt="{{ __('ui.home.track_france') }}"
+                         loading="lazy">
+                </div>
+                <div class="za-trackBody">
+                    <h3 class="za-trackName">{{ __('ui.home.track_france') }}</h3>
+                    <p class="za-trackText">{{ __('ui.home.track_france_text') }}</p>
+                    <span class="za-trackBtn">{{ __('ui.view') }}</span>
+                </div>
+            </a>
         </div>
 
         <div class="za-tracksFooter" data-reveal="delay-2">

@@ -124,6 +124,8 @@ return [
     'track_saudi_text' => 'Discover the Saudi learning path.',
     'track_quran' => 'Quran',
     'track_quran_text' => 'Listen, read and explore Quranic content.',
+    'track_france' => 'France',
+    'track_france_text' => 'Follow the French school curriculum, from primary school to the baccalauréat.',
     'see_all_systems' => 'View All Systems',
 
     'curated_pill' => 'Curated Courses',
@@ -487,6 +489,7 @@ return [
     'qatar_title' => 'Qatari Programme',
     'saudi_title' => 'Saudi Programme',
     'quran_title' => 'Quran Programme',
+    'france_title' => 'French Programme',
     'default_title' => 'Educational Programme',
 
     'hero_text_line1' => 'Choose the level, class and subject.',
@@ -743,6 +746,7 @@ return [
       'qatar' => 'Qatar',
       'saudi' => 'Saudi Arabia',
       'quran' => 'Quran',
+      'france' => 'France',
     ],
   ],
 
@@ -751,6 +755,7 @@ return [
     'qatar_text' => 'Explore the Qatari education system.',
     'saudi_text' => 'Discover the Saudi learning path.',
     'quran_text' => 'Listen, read and explore Quranic content.',
+    'france_text' => 'Follow the French school curriculum, from primary school to the baccalauréat.',
   ],
 
   'pages' => [
@@ -801,6 +806,8 @@ return [
       'offer_sa_desc'  => 'Primary, middle school and high school following the Saudi curriculum.',
       'offer_qr_title' => 'Quran and Islamic Studies',
       'offer_qr_desc'  => 'Beginner, tajwid, memorisation, tafsir.',
+      'offer_fr_title' => 'French Programme',
+      'offer_fr_desc'  => 'From primary school to the baccalauréat.',
       'values_pill'    => 'Our Values',
       'values_title'   => 'What Guides Us',
       'val1_title'     => 'Excellence',

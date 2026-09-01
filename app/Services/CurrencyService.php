@@ -126,6 +126,7 @@ class CurrencyService
         'qatar'   => 'QAR',
         'saudi'   => 'SAR',
         'quran'   => 'TND',
+        'france'  => 'EUR',
     ];
 
     /** Hour prices per regime in native currency */
@@ -134,6 +135,7 @@ class CurrencyService
         'qatar'   => 35,
         'saudi'   => 35,
         'quran'   => 30,
+        'france'  => 22,
     ];
 
     public static function detectCountry(Request $request): string

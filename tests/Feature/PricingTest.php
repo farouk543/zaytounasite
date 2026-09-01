@@ -92,6 +92,28 @@ it('shows regime packs in the visitor currency when geolocation resolves it', fu
         ->assertSee('149 € / mois', false);
 });
 
+it('serves the France regime in EUR by default', function () {
+    Track::create(['slug' => 'france', 'name' => 'France', 'is_active' => true]);
+
+    $this->get('/lang/fr');
+
+    $this->get('/regimes/france')
+        ->assertOk()
+        ->assertSee('Programme français', false)
+        ->assertSee('regimes/france/start', false)
+        ->assertSee('€', false)
+        ->assertDontSee(' DT ', false);
+});
+
+it('shows France regime packs in the visitor currency when detected', function () {
+    Track::create(['slug' => 'france', 'name' => 'France', 'is_active' => true]);
+
+    $this->withServerVariables(['HTTP_CF_IPCOUNTRY' => 'SA'])
+        ->get('/regimes/france')
+        ->assertOk()
+        ->assertSee('SAR', false);
+});
+
 it('adapts Club d\'ete pack prices to the visitor currency', function () {
     $this->withSession(['app_currency' => 'EUR', 'app_currency_manual' => true])
         ->get('/club-ete')

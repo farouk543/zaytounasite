@@ -70,6 +70,23 @@ class LevelSeeder extends Seeder
                 ['slug'=>'quran-memorisation','name'=>'Memorisation (Hifz)',   'sort_order'=>4],
                 ['slug'=>'quran-tafsir',      'name'=>'Tafsir & Sciences',     'sort_order'=>5],
             ],
+
+            // France : primaire (CP-CM2) / collège (6e-3e) / lycée (2de-Tle) + baccalauréat
+            'france' => [
+                ['slug'=>'primary-1','name'=>'CP','sort_order'=>1],
+                ['slug'=>'primary-2','name'=>'CE1','sort_order'=>2],
+                ['slug'=>'primary-3','name'=>'CE2','sort_order'=>3],
+                ['slug'=>'primary-4','name'=>'CM1','sort_order'=>4],
+                ['slug'=>'primary-5','name'=>'CM2','sort_order'=>5],
+                ['slug'=>'middle-6','name'=>'6e','sort_order'=>6],
+                ['slug'=>'middle-7','name'=>'5e','sort_order'=>7],
+                ['slug'=>'middle-8','name'=>'4e','sort_order'=>8],
+                ['slug'=>'middle-9','name'=>'3e','sort_order'=>9],
+                ['slug'=>'lycee-10','name'=>'Seconde','sort_order'=>10],
+                ['slug'=>'lycee-11','name'=>'Première','sort_order'=>11],
+                ['slug'=>'lycee-12','name'=>'Terminale','sort_order'=>12],
+                ['slug'=>'baccalaureat','name'=>'Baccalauréat','sort_order'=>13],
+            ],
         ];
 
         foreach ($data as $trackSlug => $levels) {

@@ -67,6 +67,9 @@ Route::prefix('regimes')->name('regimes.')->group(function () {
 
     Route::get('/quran', [RegimeController::class, 'showQuran'])->name('quran.show');
     Route::post('/quran/start', [RegimeController::class, 'startQuran'])->name('quran.start');
+
+    Route::get('/france', [RegimeController::class, 'showFrance'])->name('france.show');
+    Route::post('/france/start', [RegimeController::class, 'startFrance'])->name('france.start');
 });
 
 /*
@@ -273,6 +276,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/quran/checkout', [RegimeController::class, 'submitQuran'])
             ->middleware('throttle:10,1')
             ->name('quran.submit');
+
+        Route::get('/france/checkout', [RegimeController::class, 'checkoutFrance'])->name('france.checkout');
+        Route::post('/france/checkout', [RegimeController::class, 'submitFrance'])
+            ->middleware('throttle:10,1')
+            ->name('france.submit');
     });
 
     /*

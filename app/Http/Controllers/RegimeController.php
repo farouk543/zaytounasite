@@ -82,10 +82,26 @@ class RegimeController extends Controller
         return $this->checkoutBySlug($request, 'quran');
     }
 
+    public function showFrance(Request $request)
+    {
+        return $this->showBySlug($request, 'france');
+    }
+
+    public function startFrance(Request $request)
+    {
+        return $this->startBySlug($request, 'france');
+    }
+
+    public function checkoutFrance(Request $request)
+    {
+        return $this->checkoutBySlug($request, 'france');
+    }
+
     public function submitTunisia(Request $request) { return $this->submitBySlug($request, 'tunisia'); }
     public function submitQatar(Request $request)   { return $this->submitBySlug($request, 'qatar'); }
     public function submitSaudi(Request $request)   { return $this->submitBySlug($request, 'saudi'); }
     public function submitQuran(Request $request)   { return $this->submitBySlug($request, 'quran'); }
+    public function submitFrance(Request $request)  { return $this->submitBySlug($request, 'france'); }
 
     /*
     |--------------------------------------------------------------------------
@@ -558,7 +574,7 @@ class RegimeController extends Controller
             $sharedPacks[4]['features'] = ['Plusieurs niveaux', 'Séances 1h ou 2h', 'Mensuel / Trimestriel / Annuel'];
         }
 
-        return in_array($slug, ['tunisia', 'qatar', 'saudi', 'quran'], true) ? $sharedPacks : [];
+        return in_array($slug, ['tunisia', 'qatar', 'saudi', 'quran', 'france'], true) ? $sharedPacks : [];
     }
 
     public function index()
@@ -591,6 +607,13 @@ class RegimeController extends Controller
                 'text' => 'Apprentissage du Quran : lecture, tajweed, memorisation et tafsir.',
                 'image' => asset('images/Quran.png'),
                 'route' => route('regimes.quran.show'),
+            ],
+            [
+                'key' => 'france',
+                'title' => __('ui.regimes_index.filters.france'),
+                'text' => __('ui.regimes_systems.france_text'),
+                'image' => asset('images/france.jpg'),
+                'route' => route('regimes.france.show'),
             ],
         ];
 
