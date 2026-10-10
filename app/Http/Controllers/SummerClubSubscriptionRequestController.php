@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SummerClubSubscriptionRequest;
+use App\Notifications\SummerClubSubscriptionPending;
 use App\Services\CurrencyService;
+use App\Support\AdminNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -34,7 +36,7 @@ class SummerClubSubscriptionRequestController extends Controller
         $currency = CurrencyService::current();
         $price = SummerClubSubscriptionRequest::priceFor($validated['pack_key'], $currency);
 
-        SummerClubSubscriptionRequest::create([
+        $subscription = SummerClubSubscriptionRequest::create([
             'user_id' => $request->user()?->id,
             'parent_name' => $validated['parent_name'],
             'student_name' => $validated['student_name'],
@@ -49,6 +51,8 @@ class SummerClubSubscriptionRequestController extends Controller
             'duration_months' => $pack['duration_months'],
             'status' => 'pending',
         ]);
+
+        AdminNotifier::send(new SummerClubSubscriptionPending($subscription));
 
         $message = "Votre demande a été envoyée. L'équipe Zaytouna vous contactera pour confirmer l'abonnement.";
 

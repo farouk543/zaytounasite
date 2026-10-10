@@ -30,6 +30,12 @@ class OrderResource extends Resource
     public static function canCreate(): bool { return false; }
     public static function canDelete(Model $record): bool { return false; }
 
+    // Les abonnements live (régimes) ont leur propre écran : LiveSubscriptionResource
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->where('type', '!=', 'regime');
+    }
+
     public static function form(Schema $schema): Schema
     {
         // lecture seule (on ne crée pas / on ne modifie pas l’ordre manuellement)

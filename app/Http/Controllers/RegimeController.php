@@ -8,9 +8,9 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Subject;
 use App\Models\Track;
-use App\Models\User;
 use App\Notifications\RegimeOrderPending;
 use App\Services\CurrencyService;
+use App\Support\AdminNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -395,24 +395,37 @@ class RegimeController extends Controller
                 ->with('error', 'Votre sélection a expiré. Veuillez recommencer.');
         }
 
+        $contact = $request->validate([
+            'parent_name'    => ['required', 'string', 'max:255'],
+            'student_name'   => ['required', 'string', 'max:255'],
+            'phone'          => ['required', 'string', 'max:40'],
+            'contact_email'  => ['required', 'email', 'max:255'],
+            'customer_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
         $user     = $request->user();
         $isCustom = ($sel['pack'] ?? '') === 'custom';
         $currency = $sel['pricing']['currency'] ?? $this->visitorCurrencyFor($slug);
 
-        // For custom packs the total is computed; for classic packs it's TBD by admin
+        // Pack personnalisé : total calculé pour la période ; pack classique : prix mensuel affiché
         $totalCents = $isCustom
             ? (int) ($sel['pricing']['total_cents'] ?? 0)
-            : 0;
+            : CurrencyService::packPrice($sel['pack'] ?? '', $currency) * 100;
 
-        $order = DB::transaction(function () use ($user, $sel, $slug, $currency, $totalCents) {
+        $order = DB::transaction(function () use ($user, $sel, $slug, $currency, $totalCents, $contact) {
             $order = Order::create([
                 'user_id'        => $user->id,
+                'type'           => 'regime',
+                'regime'         => $slug,
+                'pack'           => $sel['pack'] ?? null,
+                'plan'           => $sel['plan'] ?? null,
+                'selection'      => $sel,
                 'status'         => 'pending_manual',
-                'subtotal_cents' => $totalCents,
+                'subtotal_cents' => (int) ($sel['pricing']['subtotal_cents'] ?? $totalCents),
                 'discount_cents' => (int) ($sel['pricing']['discount_cents'] ?? 0),
                 'total_cents'    => $totalCents,
                 'currency'       => $currency,
-            ]);
+            ] + $contact);
 
             // No order_items (regime = live service, no course_id)
             // All details stored in payment payload
@@ -435,12 +448,9 @@ class RegimeController extends Controller
 
         session()->forget('regime.selection');
 
-        // Notify admins
+        // Notifier les admins (cloche Filament + e-mail)
         $order->load('user');
-        $admins = User::role('admin')->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new RegimeOrderPending($order, $slug, $sel));
-        }
+        AdminNotifier::send(new RegimeOrderPending($order));
 
         return redirect()
             ->route('dashboard')

@@ -5,11 +5,15 @@ namespace App\Filament\Resources\SummerClubSubscriptionRequests\Tables;
 use App\Models\SummerClubEnrollment;
 use App\Models\SummerClubSubscriptionRequest;
 use App\Models\User;
+use App\Notifications\SummerClubSubscriptionApproved;
+use App\Support\AdminNotifier;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Notifications\Notification as FilamentNotification;
+use Filament\Schemas\Components\Section;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -32,7 +36,8 @@ class SummerClubSubscriptionRequestsTable
 
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Téléphone')
-                    ->searchable(),
+                    ->description(fn ($record) => $record->email)
+                    ->searchable(['phone', 'email']),
 
                 Tables\Columns\TextColumn::make('pack_name')
                     ->label('Pack')
@@ -113,8 +118,36 @@ class SummerClubSubscriptionRequestsTable
                             ->searchable()
                             ->nullable()
                             ->helperText('Recommandé pour limiter l’accès au niveau précis de l’étudiant.'),
+
+                        Section::make('E-mail de confirmation au parent')
+                            ->columns(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('recipient')
+                                    ->label('E-mail du parent')
+                                    ->email()
+                                    ->default($record->email ?: $record->user?->email)
+                                    ->helperText('Laisser vide pour ne pas envoyer d’e-mail.'),
+                                Forms\Components\TextInput::make('platform_url')
+                                    ->label('Adresse de connexion')
+                                    ->url()
+                                    ->default(config('zaytouna.platform_url') ?: route('login')),
+                                Forms\Components\TextInput::make('login')
+                                    ->label('Identifiant de l’élève')
+                                    ->helperText('Par défaut : l’e-mail du compte sélectionné.'),
+                                Forms\Components\TextInput::make('password')
+                                    ->label('Mot de passe provisoire')
+                                    ->helperText('Envoyé dans l’e-mail uniquement, jamais enregistré.'),
+                                Forms\Components\Textarea::make('schedule')
+                                    ->label('Planning')
+                                    ->rows(2)
+                                    ->columnSpanFull(),
+                                Forms\Components\Textarea::make('message')
+                                    ->label('Message au parent')
+                                    ->rows(2)
+                                    ->columnSpanFull(),
+                            ]),
                     ])
-                    ->requiresConfirmation()
+                    ->modalWidth('3xl')
                     ->action(function ($record, array $data) {
                         $userId = (int) $data['user_id'];
                         $subjects = SummerClubSubscriptionRequest::subjectsForPack(
@@ -130,7 +163,7 @@ class SummerClubSubscriptionRequestsTable
                             'approved_by' => auth()->id(),
                         ]);
 
-                        SummerClubEnrollment::create([
+                        $enrollment = SummerClubEnrollment::create([
                             'user_id' => $userId,
                             'pack_key' => $record->pack_key,
                             'pack_name' => SummerClubSubscriptionRequest::packDefinitions()[$record->pack_key]['name'] ?? $record->pack_name,
@@ -143,6 +176,22 @@ class SummerClubSubscriptionRequestsTable
                             'confirmed_by' => auth()->id(),
                             'notes' => "Créé depuis la demande d'abonnement #{$record->id}",
                         ]);
+
+                        if (blank($data['recipient'] ?? null)) {
+                            return;
+                        }
+
+                        $access = collect($data)->only(['platform_url', 'login', 'password', 'schedule', 'message'])->all();
+                        $access['login'] = $access['login'] ?: User::find($userId)?->email;
+
+                        $sent = AdminNotifier::mailTo(
+                            $data['recipient'],
+                            new SummerClubSubscriptionApproved($record, $enrollment, $access)
+                        );
+
+                        $sent
+                            ? FilamentNotification::make()->title('Demande approuvée')->body('E-mail envoyé à ' . $data['recipient'] . '.')->success()->send()
+                            : FilamentNotification::make()->title('Demande approuvée, mais l’e-mail n’a pas pu être envoyé')->body('Vérifiez la configuration e-mail (MAIL_*).')->warning()->persistent()->send();
                     }),
 
                 Action::make('reject')

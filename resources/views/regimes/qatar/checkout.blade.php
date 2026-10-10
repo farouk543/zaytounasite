@@ -166,12 +166,7 @@
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <a class="btn-outline" href="{{ $backUrl }}">{{ __('ui.back') }}</a>
-              <form method="POST" action="{{ route('regimes.qatar.submit') }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn-primary" onclick="this.disabled=true;this.textContent='Envoi en cours…';">
-                  ✅ Confirmer ma demande
-                </button>
-              </form>
+              @include('regimes.partials.submit-form', ['slug' => 'qatar'])
             </div>
           </div>
         @else
@@ -208,9 +203,7 @@
 
           <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
             <a class="btn-outline" href="{{ $backUrl }}">{{ __('ui.back') }}</a>
-            <button class="btn-primary" type="button" disabled style="opacity:.7; cursor:not-allowed;">
-              {{ __('ui.checkout.pay_cta_soon') }}
-            </button>
+            @include('regimes.partials.submit-form', ['slug' => 'qatar'])
           </div>
 
           <div class="za-muted" style="margin-top:12px;">

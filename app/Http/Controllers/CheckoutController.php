@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\ManualOrderPending;
+use App\Support\AdminNotifier;
 use App\Services\CurrencyService;
 use App\Services\PriceResolver;
 use Illuminate\Http\Request;
@@ -100,15 +101,8 @@ class CheckoutController extends Controller
         });
 
         // Notifier les admins (hors transaction pour éviter tout rollback)
-        try {
-            $order->load('user', 'items.course');
-            $admins = User::role('admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new ManualOrderPending($order));
-            }
-        } catch (\Throwable $e) {
-            // Notification non bloquante
-        }
+        $order->load('user', 'items.course');
+        AdminNotifier::send(new ManualOrderPending($order));
 
         return redirect()
             ->route('dashboard')

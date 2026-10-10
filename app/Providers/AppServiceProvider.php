@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Notifications\NewUserRegistered;
+use App\Support\AdminNotifier;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -30,19 +31,15 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            if (method_exists($user, 'roles') && $user->roles()->count() > 0) {
-                return;
+            // Le contrôleur d'inscription peut déjà avoir attribué le rôle : on notifie quand même
+            if ($user->roles()->count() === 0) {
+                Role::findOrCreate('student', 'web');
+                $user->assignRole('student');
             }
 
-            Role::findOrCreate('student', 'web');
-            $user->assignRole('student');
-
-            // Notifier tous les admins
+            // Notifier tous les admins (cloche Filament + e-mail)
             Role::findOrCreate('admin', 'web');
-            $admins = \App\Models\User::role('admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new NewUserRegistered($user));
-            }
+            AdminNotifier::send(new NewUserRegistered($user));
         });
     }
 }

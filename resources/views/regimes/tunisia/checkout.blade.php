@@ -181,12 +181,7 @@
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <a class="btn-outline" href="{{ route('regimes.tunisia.show') }}">{{ __('ui.back') }}</a>
-              <form method="POST" action="{{ route('regimes.tunisia.submit') }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn-primary" onclick="this.disabled=true;this.textContent='Envoi en cours…';">
-                  ✅ Confirmer ma demande
-                </button>
-              </form>
+              @include('regimes.partials.submit-form', ['slug' => 'tunisia'])
             </div>
           </div>
         @else
@@ -227,12 +222,7 @@
 
           <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <a class="btn-outline" href="{{ route('regimes.tunisia.show') }}">{{ __('ui.back') }}</a>
-            <form method="POST" action="{{ route('regimes.tunisia.submit') }}" style="display:inline;">
-              @csrf
-              <button type="submit" class="btn-primary" onclick="this.disabled=true;this.textContent='Envoi en cours…';">
-                ✅ Confirmer ma demande
-              </button>
-            </form>
+            @include('regimes.partials.submit-form', ['slug' => 'tunisia'])
           </div>
 
           <div class="za-muted" style="margin-top:12px;">

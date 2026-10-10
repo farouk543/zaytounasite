@@ -56,6 +56,18 @@ class SummerClubSubscriptionRequestResource extends Resource
         return parent::getEloquentQuery()->with(['user', 'approvedBy', 'rejectedBy']);
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $pending = static::getModel()::query()->where('status', 'pending')->count();
+
+        return $pending > 0 ? (string) $pending : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
     public static function canViewAny(): bool
     {
         return auth()->user()?->hasRole('admin') ?? false;

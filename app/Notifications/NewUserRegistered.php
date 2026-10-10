@@ -3,7 +3,9 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Support\AdminNotifier;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewUserRegistered extends Notification
@@ -16,7 +18,7 @@ class NewUserRegistered extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return AdminNotifier::channelsFor($notifiable);
     }
 
     public function toDatabase(object $notifiable): array
@@ -29,5 +31,16 @@ class NewUserRegistered extends Notification
             'user_id' => $this->newUser->id,
             'url'     => '/admin/users/' . $this->newUser->id . '/edit',
         ];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Nouvel inscrit : ' . $this->newUser->name)
+            ->greeting('Nouvelle inscription sur Zaytouna Academy')
+            ->line('**Nom :** ' . $this->newUser->name)
+            ->line('**E-mail :** ' . $this->newUser->email)
+            ->line('**Date :** ' . $this->newUser->created_at?->format('d/m/Y H:i'))
+            ->action('Voir le compte', url('/admin/users/' . $this->newUser->id . '/edit'));
     }
 }
