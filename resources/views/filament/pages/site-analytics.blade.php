@@ -252,6 +252,45 @@
     @endif
   </div>
 
+  {{-- ===== Parcours complet : site → plateforme ===== --}}
+  <div class="zs-card">
+    <div class="zs-top">
+      <div>
+        <div class="zs-h">🧭 Parcours complet — {{ $platformMonth }}</div>
+        <p class="zs-sub" style="margin:0">Du visiteur à l’élève fidèle, par pays : où perd-on les familles ? Les 3 dernières étapes viennent de la plateforme (élèves dont le compte a été créé depuis une demande du site).</p>
+      </div>
+    </div>
+    @php($stageKeys = array_keys(\App\Services\Analytics\Funnel::STAGES))
+    @php($fCell = fn ($row, $key) => $row[$key] === null ? '—' : $fmt($row[$key]))
+    @php($fRate = fn ($row, $key) => ($row['rates'][$key] ?? null) === null ? '' : '<span class="zs-sub" style="display:block;font-size:.72rem">'.$row['rates'][$key].' %</span>')
+    <table class="zs-table">
+      <thead><tr><th>Pays</th>@foreach(\App\Services\Analytics\Funnel::STAGES as $stageLabel)<th class="n">{{ $stageLabel }}</th>@endforeach</tr></thead>
+      <tbody>
+        @foreach($funnel['rows'] as $frow)
+          <tr>
+            <td>{!! \App\Support\Markets::flagHtml($frow['code'], 14) !!} {{ $frow['name'] }}</td>
+            @foreach($stageKeys as $sk)
+              <td class="n">{{ $fCell($frow, $sk) }}{!! $fRate($frow, $sk) !!}</td>
+            @endforeach
+          </tr>
+        @endforeach
+        <tr style="font-weight:700">
+          <td>Tous pays</td>
+          @foreach($stageKeys as $sk)
+            <td class="n">{{ $fCell($funnel['total'], $sk) }}{!! $fRate($funnel['total'], $sk) !!}</td>
+          @endforeach
+        </tr>
+      </tbody>
+    </table>
+    @if($funnel['leak'])
+      <p class="zs-sub" style="margin:.8rem 0 0">⚠️ Plus grosse perte : <strong>{{ $funnel['leak']['from'] }} → {{ $funnel['leak']['to'] }} ({{ $funnel['leak']['rate'] }} %)</strong>. {{ $funnel['leak']['advice'] }}</p>
+    @endif
+    @if(! $funnel['platform'])
+      <p class="zs-sub" style="margin:.6rem 0 0">Les étapes de la plateforme s’afficheront dès qu’elle répondra.</p>
+    @endif
+    <p class="zs-sub" style="margin:.4rem 0 0">Le % sous chaque chiffre = part de l’étape précédente. « Élèves fidèles » = présents ce mois et le mois précédent (tous élèves du pays).</p>
+  </div>
+
   {{-- ===== Plateforme d'enseignement ===== --}}
   <div class="zs-card">
     <div class="zs-top">

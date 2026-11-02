@@ -18,6 +18,7 @@ class ViewLiveSubscription extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            LiveSubscriptionActions::createPlatformAccount(),
             LiveSubscriptionActions::approve(),
             LiveSubscriptionActions::reject(),
             LiveSubscriptionActions::resendAccess(),

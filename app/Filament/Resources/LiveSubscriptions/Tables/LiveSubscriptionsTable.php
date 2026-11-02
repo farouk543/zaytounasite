@@ -95,6 +95,7 @@ class LiveSubscriptionsTable
                 LiveSubscriptionActions::approve(),
                 ActionGroup::make([
                     ViewAction::make()->label('Voir la fiche'),
+                    LiveSubscriptionActions::createPlatformAccount(),
                     LiveSubscriptionActions::resendAccess(),
                     LiveSubscriptionActions::reject(),
                 ]),

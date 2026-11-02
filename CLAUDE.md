@@ -124,6 +124,17 @@ static Blade view.
   of `/admin/statistiques`; API down → goals « Indisponible » (not scored).
   Reverse direction: `GET /api/site/stats?period=&month=` (`routes/api.php`, `Api\SiteStatsController`, same Bearer token)
   feeds the platform's admin page « Site principal » — field whitelist only, never names/e-mails/visitor hashes.
+- **Site ↔ platform bridge** (`App\Services\PlatformBridge`, same token, platform routes `/api/site/*`):
+  every `AdminNotifier::send()` alert is relayed (deferred, no personal data) to the platform admins' bell;
+  LiveSubscriptions action « Créer le compte sur la plateforme » creates/links the student (`site_order_id` on the
+  platform `users`) and pre-fills login + temp password (encrypted in cache 2 h) in « Accepter & envoyer les accès »;
+  `testimonials:import-platform` (weekly + button in Témoignages) imports public 4–5★ student reviews as UNPUBLISHED
+  testimonials (`source = plateforme`, `external_ref`).
+- **Funnel** (`Analytics\Funnel`): visitors → regime orders → accepted → platform accounts → active → retained, per
+  market (order country = country of the parent's page views); shown on `/admin/statistiques` and in `/api/site/stats`.
+- **Monthly report**: `marketing:monthly-report [--month=] [--to=]` (`MonthlyReport` + `MonthlyMarketingReport` mail),
+  scheduled the 1st at 08:00 Tunis; button « Recevoir le bilan par e-mail » on `/admin/statistiques`. Scheduler needs the
+  Hostinger cron `php artisan schedule:run` every minute.
 - **Security**: `SecurityHeaders` (safe CSP: frame-ancestors/base-uri/object-src/form-action, no X-Powered-By). Paid
   exercise PDF/audio/video live on the `private` disk, served by `exercise.media` (access-checked, admins allowed).
 - **Conversion tools**: floating WhatsApp button (`partials/whatsapp-button`, number `WHATSAPP_NUMBER` →

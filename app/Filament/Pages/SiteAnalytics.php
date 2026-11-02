@@ -3,10 +3,17 @@
 namespace App\Filament\Pages;
 
 use App\Models\MarketingGoal;
+use App\Notifications\MonthlyMarketingReport;
 use App\Services\Analytics\AnalyticsReport;
+use App\Services\Analytics\Funnel;
 use App\Services\Analytics\GoalTracker;
+use App\Services\Analytics\MonthlyReport;
 use App\Services\Analytics\PlatformStats;
+use App\Support\AdminNotifier;
 use BackedEnum;
+use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Livewire\Attributes\Url;
@@ -43,6 +50,28 @@ class SiteAnalytics extends Page
         return auth()->user()?->hasRole('admin') ?? false;
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('monthlyReport')
+                ->label('Recevoir le bilan par e-mail')
+                ->icon('heroicon-o-envelope')
+                ->color('gray')
+                ->requiresConfirmation()
+                ->modalHeading('Bilan marketing par e-mail')
+                ->modalDescription(fn () => 'Le bilan du mois sélectionné dans « Objectifs » est envoyé à '.auth()->user()->email
+                    .'. Il est aussi envoyé automatiquement à tous les admins le 1er de chaque mois.')
+                ->action(function () {
+                    $month = $this->goalMonth ?: now(config('marketing.timezone'))->format('Y-m');
+                    $sent = AdminNotifier::mailTo(auth()->user()->email, new MonthlyMarketingReport(app(MonthlyReport::class)->build($month)));
+
+                    $sent
+                        ? Notification::make()->title('Bilan envoyé à '.auth()->user()->email)->success()->send()
+                        : Notification::make()->title('Envoi impossible : vérifiez la configuration e-mail (MAIL_*)')->danger()->send();
+                }),
+        ];
+    }
+
     public function setGoalMonth(string $month): void
     {
         $this->goalMonth = preg_match('/^\d{4}-\d{2}$/', $month) ? $month : '';
@@ -69,8 +98,9 @@ class SiteAnalytics extends Page
             'goalElapsed' => $goals->elapsed($goalMonth),
             'goalHistory' => $goals->history(),
             'markets' => $report->markets(),
+            'funnel' => app(Funnel::class)->month($goalMonth),
             'platform' => app(PlatformStats::class)->month($goalMonth),
-            'platformMonth' => ucfirst(\Carbon\CarbonImmutable::createFromFormat('Y-m-d', $goalMonth.'-01')->locale('fr')->isoFormat('MMMM YYYY')),
+            'platformMonth' => ucfirst(CarbonImmutable::createFromFormat('Y-m-d', $goalMonth.'-01')->locale('fr')->isoFormat('MMMM YYYY')),
             'platformConfigured' => app(PlatformStats::class)->configured(),
             'report' => $report,
             'periods' => AnalyticsReport::PERIODS,

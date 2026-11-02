@@ -7,11 +7,16 @@ use App\Notifications\OrderApproved;
 use App\Notifications\RegimeSubscriptionApproved;
 use App\Support\AdminNotifier;
 use Filament\Actions\Action;
+use App\Models\PageView;
+use App\Services\PlatformBridge;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Schemas\Components\Section;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,6 +24,100 @@ use Illuminate\Support\Facades\DB;
  */
 class LiveSubscriptionActions
 {
+    /** Mot de passe provisoire renvoyé par la plateforme : gardé chiffré 2 h, le temps d'envoyer les accès. */
+    private const TEMP_PASSWORD_TTL_MINUTES = 120;
+
+    public static function createPlatformAccount(): Action
+    {
+        return Action::make('createPlatformAccount')
+            ->label('Créer le compte sur la plateforme')
+            ->icon('heroicon-o-user-plus')
+            ->color('info')
+            ->visible(fn (Order $record) => in_array($record->status, ['pending_manual', 'paid'], true)
+                && blank($record->platform_username)
+                && app(PlatformBridge::class)->configured())
+            ->modalHeading(fn (Order $record) => 'Compte élève pour l\'abonnement #' . $record->id)
+            ->modalDescription('Le compte est créé directement sur la plateforme de cours, avec un mot de passe provisoire (l\'élève le change à la 1re connexion). Identifiant et mot de passe sont ensuite pré-remplis dans « Accepter & envoyer les accès ».')
+            ->modalSubmitActionLabel('Créer le compte')
+            ->fillForm(fn (Order $record) => [
+                'name' => $record->student_name ?: $record->user?->name,
+                'email' => $record->parentEmail(),
+                'timezone' => self::guessTimezone($record),
+            ])
+            ->schema([
+                TextInput::make('name')->label('Nom de l\'élève')->required()->maxLength(255),
+                TextInput::make('email')->label('E-mail de connexion de l\'élève')->email()->required()
+                    ->helperText('Une adresse par élève : pour un frère ou une sœur, utilisez une autre adresse.'),
+                Select::make('timezone')->label('Pays / fuseau horaire')->required()->options([
+                    'Africa/Tunis' => 'Tunisie',
+                    'Europe/Paris' => 'France',
+                    'Asia/Qatar' => 'Qatar',
+                    'Asia/Riyadh' => 'Arabie saoudite',
+                    'America/Toronto' => 'Canada (Est)',
+                    'America/Vancouver' => 'Canada (Ouest)',
+                    'Europe/Brussels' => 'Belgique',
+                    'Europe/Zurich' => 'Suisse',
+                    'Asia/Dubai' => 'Émirats arabes unis',
+                    'Africa/Casablanca' => 'Maroc',
+                    'Africa/Algiers' => 'Algérie',
+                ]),
+            ])
+            ->action(function (Order $record, array $data) {
+                $result = app(PlatformBridge::class)->createStudent($record, $data['name'], $data['email'], $data['timezone'] ?? null);
+
+                if (! $result['ok']) {
+                    FilamentNotification::make()->title('Compte non créé')->body($result['error'] ?? 'Erreur inconnue.')->danger()->persistent()->send();
+
+                    return;
+                }
+
+                $record->update(['platform_username' => $result['login']]);
+
+                if (! empty($result['password'])) {
+                    Cache::put(self::passwordKey($record), Crypt::encryptString($result['password']), now()->addMinutes(self::TEMP_PASSWORD_TTL_MINUTES));
+                }
+
+                $created = (bool) ($result['created'] ?? false);
+
+                FilamentNotification::make()
+                    ->title($created ? 'Compte créé sur la plateforme' : 'Compte existant relié à cet abonnement')
+                    ->body($created
+                        ? 'Identifiant : ' . $result['login'] . '. Le mot de passe provisoire est pré-rempli dans « Accepter & envoyer les accès » (pendant 2 h).'
+                        : 'L\'élève ' . $result['login'] . ' avait déjà un compte : il garde son mot de passe actuel.')
+                    ->success()
+                    ->persistent()
+                    ->send();
+            });
+    }
+
+    /** Fuseau probable de l'élève : régime choisi, sinon pays des pages vues par le parent. */
+    private static function guessTimezone(Order $record): string
+    {
+        if ($tz = PlatformBridge::REGIME_TIMEZONES[$record->regime] ?? null) {
+            return $tz;
+        }
+
+        $country = PageView::where('user_id', $record->user_id)->whereNotNull('country')->latest('id')->value('country');
+
+        return PlatformBridge::COUNTRY_TIMEZONES[$country] ?? 'Africa/Tunis';
+    }
+
+    private static function passwordKey(Order $record): string
+    {
+        return 'platform-temp-password:' . $record->id;
+    }
+
+    private static function pendingPassword(Order $record): ?string
+    {
+        try {
+            $encrypted = Cache::get(self::passwordKey($record));
+
+            return $encrypted ? Crypt::decryptString($encrypted) : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     public static function approve(): Action
     {
         return Action::make('approve')
@@ -27,7 +126,7 @@ class LiveSubscriptionActions
             ->color('success')
             ->visible(fn (Order $record) => $record->status === 'pending_manual')
             ->modalHeading(fn (Order $record) => 'Accepter l\'abonnement #' . $record->id)
-            ->modalDescription('Créez d\'abord le compte de l\'élève sur la plateforme de cours, puis renseignez ses accès : ils seront envoyés par e-mail au parent avec le récapitulatif de l\'abonnement.')
+            ->modalDescription('Créez d\'abord le compte de l\'élève sur la plateforme de cours (bouton « Créer le compte sur la plateforme »), puis renseignez ses accès : ils seront envoyés par e-mail au parent avec le récapitulatif de l\'abonnement.')
             ->modalSubmitActionLabel('Accepter et envoyer l\'e-mail')
             ->modalWidth('3xl')
             ->fillForm(fn (Order $record) => self::defaults($record))
@@ -120,7 +219,7 @@ class LiveSubscriptionActions
                     TextInput::make('password')
                         ->label('Mot de passe provisoire')
                         ->maxLength(255)
-                        ->helperText('Envoyé dans l\'e-mail uniquement, jamais enregistré ici.'),
+                        ->helperText('Envoyé dans l\'e-mail uniquement, jamais enregistré ici (s\'il vient de « Créer le compte sur la plateforme », il reste chiffré 2 h au plus).'),
                 ]),
 
             Section::make('Démarrage des cours')
@@ -163,6 +262,7 @@ class LiveSubscriptionActions
         return [
             'platform_url' => config('zaytouna.platform_url'),
             'login'        => $record->platform_username,
+            'password'     => self::pendingPassword($record),
             'recipient'    => $record->parentEmail(),
             'admin_notes'  => $record->admin_notes,
         ];
@@ -178,6 +278,7 @@ class LiveSubscriptionActions
 
         if ($sent) {
             $record->update(['access_sent_at' => now()]);
+            Cache::forget(self::passwordKey($record));
 
             FilamentNotification::make()
                 ->title($title)

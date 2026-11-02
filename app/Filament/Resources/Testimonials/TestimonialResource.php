@@ -139,8 +139,16 @@ class TestimonialResource extends Resource
                 Tables\Columns\TextColumn::make('source')
                     ->label('Origine')
                     ->badge()
-                    ->formatStateUsing(fn (string $state) => $state === 'site' ? 'Formulaire du site' : 'Back-office')
-                    ->color(fn (string $state) => $state === 'site' ? 'info' : 'gray'),
+                    ->formatStateUsing(fn (string $state) => match ($state) {
+                        'site' => 'Formulaire du site',
+                        'plateforme' => 'Plateforme (élève)',
+                        default => 'Back-office',
+                    })
+                    ->color(fn (string $state) => match ($state) {
+                        'site' => 'info',
+                        'plateforme' => 'success',
+                        default => 'gray',
+                    }),
                 Tables\Columns\ToggleColumn::make('is_published')->label('Publié'),
                 Tables\Columns\ToggleColumn::make('is_featured')->label('En avant'),
                 Tables\Columns\TextColumn::make('received_at')->label('Reçu le')->date('d/m/Y')->sortable(),

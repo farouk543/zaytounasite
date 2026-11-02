@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\SummerClubSubscriptionRequest;
 use App\Models\Testimonial;
 use App\Services\Analytics\AnalyticsReport;
+use App\Services\Analytics\Funnel;
 use App\Services\Analytics\GoalTracker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -88,6 +89,7 @@ class SiteStatsController extends Controller
                 'testimonials_published' => Testimonial::where('is_published', true)->count(),
                 'club_requests' => SummerClubSubscriptionRequest::whereBetween('created_at', [$report->from, $report->to])->count(),
             ],
+            'funnel' => app(Funnel::class)->month($month),
             'goals' => [
                 'month' => $month,
                 'elapsed' => round($goals->elapsed($month), 2),
