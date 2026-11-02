@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('seo.pages.privacy.title'))
+@section('meta_description', __('seo.pages.privacy.description'))
+
 @section('content')
 
 {{-- ===== HERO ===== --}}

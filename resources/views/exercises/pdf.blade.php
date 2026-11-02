@@ -5,7 +5,7 @@
     $title       = $exercise->title_display ?? $exercise->title;
     $description = $exercise->description ?? null;
     $instructions= $exercise->instructions ?? null;
-    $pdfUrl      = \Illuminate\Support\Facades\Storage::disk('public')->url($exercise->pdf_path);
+    $pdfUrl      = route('exercise.media', ['exercise' => $exercise, 'kind' => 'pdf']);
 
     $diffColor = match($exercise->difficulty) {
         'easy'   => '#10b981',

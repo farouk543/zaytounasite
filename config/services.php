@@ -49,4 +49,12 @@ return [
         'cache_days' => (int) env('GEOIP_LOOKUP_CACHE_DAYS', 30),
     ],
 
+    /*
+    | Google Search Console : code de vérification « balise HTML »
+    | (le contenu de content="…"), à mettre dans GOOGLE_SITE_VERIFICATION.
+    */
+    'google' => [
+        'site_verification' => env('GOOGLE_SITE_VERIFICATION'),
+    ],
+
 ];

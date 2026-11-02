@@ -13,6 +13,10 @@ use App\Http\Controllers\ExercisePlayerController;
 use App\Http\Controllers\PackProgressController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\SeoController;
+use App\Http\Controllers\ClickTrackingController;
+use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\SummerClubSubscriptionRequestController;
 use App\Http\Controllers\Student\SummerClubController as StudentSummerClubController;
 
@@ -27,6 +31,23 @@ Route::get('/courses/{course:slug}', [CatalogController::class, 'show'])->name('
 
 /*
 |--------------------------------------------------------------------------
+| Blog & SEO
+|--------------------------------------------------------------------------
+*/
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/categorie/{categorySlug}', [BlogController::class, 'index'])->name('blog.category');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+
+// Statistiques : clics envoyés par le script du layout (sendBeacon).
+Route::post('/t/c', [ClickTrackingController::class, 'store'])
+    ->middleware('throttle:120,1')
+    ->name('analytics.click');
+
+/*
+|--------------------------------------------------------------------------
 | Static pages
 |--------------------------------------------------------------------------
 */
@@ -35,6 +56,10 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [PageController::class, 'contactSend'])
     ->middleware('throttle:5,1')
     ->name('contact.send');
+Route::get('/avis', [TestimonialController::class, 'create'])->name('reviews.create');
+Route::post('/avis', [TestimonialController::class, 'store'])
+    ->middleware('throttle:3,10')
+    ->name('reviews.store');
 
 Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
@@ -127,44 +152,6 @@ Route::get('/devise/{code}', function (string $code) {
 
     return redirect()->to($safe);
 })->middleware('throttle:30,1')->name('currency.switch');
-
-/*
-|--------------------------------------------------------------------------
-| Diagnostic géolocalisation Cloudflare
-|--------------------------------------------------------------------------
-| Ne renvoie que des infos sur la requête courante (aucune donnée sensible).
-| Sert à vérifier que Cloudflare injecte bien l'en-tête CF-IPCountry.
-*/
-Route::get('/_health/geo', function (\Illuminate\Http\Request $request) {
-    $geoKeys = [
-        'CF-IPCountry', 'CloudFront-Viewer-Country', 'X-Country-Code', 'X-Geo-Country',
-        'X-AppEngine-Country', 'Fastly-Country-Code', 'X-Forwarded-For', 'X-Real-IP',
-    ];
-
-    $geoHeaders = [];
-    foreach ($geoKeys as $k) {
-        $geoHeaders[$k] = $request->header($k);
-    }
-
-    $serverGeo = array_filter(
-        $_SERVER,
-        fn ($k) => str_contains(strtoupper($k), 'COUNTRY') || str_contains(strtoupper($k), 'GEOIP'),
-        ARRAY_FILTER_USE_KEY
-    );
-
-    return response()->json([
-        'via_cloudflare'    => $request->hasHeader('CF-Ray'),
-        'cf_ip_country'     => $request->header('CF-IPCountry'),
-        'client_ip'         => $request->ip(),
-        'geoip_lookup'      => app(\App\Services\GeoIpResolver::class)->countryFor($request->ip()),
-        'detected_currency' => \App\Services\CurrencyService::current(),
-        'currency_source'   => session('app_currency_manual')
-            ? 'manuel (/devise)'
-            : (session('app_currency_resolved') ? 'géolocalisation' : 'défaut (TND)'),
-        'geo_headers'       => array_filter($geoHeaders),
-        'server_geo_vars'   => $serverGeo,
-    ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-})->middleware('throttle:20,1')->name('health.geo');
 
 /*
 |--------------------------------------------------------------------------
@@ -303,6 +290,11 @@ Route::middleware('auth')->group(function () {
     */
     Route::get('/exercise/{exercise}', [ExercisePlayerController::class, 'show'])
         ->name('exercise.show');
+
+    Route::get('/exercise/{exercise}/media/{kind}', [ExercisePlayerController::class, 'media'])
+        ->whereIn('kind', ['pdf', 'audio', 'video'])
+        ->middleware('throttle:60,1')
+        ->name('exercise.media');
 
     Route::post('/exercise/{exercise}/submit', [ExercisePlayerController::class, 'submit'])
         ->middleware('throttle:20,1')

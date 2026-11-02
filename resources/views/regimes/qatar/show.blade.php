@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('seo.pages.qatar.title'))
+@section('meta_description', __('seo.pages.qatar.description'))
+
 @section('content')
 @php
   use App\Services\CurrencyService;
@@ -486,6 +489,8 @@
     <input type="hidden" name="items" x-ref="itemsInput">
   </form>
 </section>
+
+@include('partials.testimonials', ['program' => 'qatar'])
 @endsection
 
 @push('scripts')

@@ -1042,4 +1042,9 @@ return [
     'back_to_course'       => '← Retour au cours',
     'restart'              => '🔄 Recommencer',
   ],
+  'whatsapp' => [
+    'label'   => 'Une question ? Écrivez-nous',
+    'aria'    => 'Nous contacter sur WhatsApp',
+    'message' => 'Bonjour Zaytouna Academy 👋 Je souhaite avoir des informations. (Page : :page)',
+  ],
 ];

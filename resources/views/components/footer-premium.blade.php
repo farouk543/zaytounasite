@@ -34,6 +34,8 @@
           <ul class="mt-4 space-y-2 text-sm">
             <li><a class="footer-link" href="{{ route('home') }}">{{ __('ui.nav.home') }}</a></li>
             <li><a class="footer-link" href="{{ route('catalog') }}">{{ __('ui.nav.catalog') }}</a></li>
+            <li><a class="footer-link" href="{{ route('regimes.index') }}">{{ __('blog.cta_live') }}</a></li>
+            <li><a class="footer-link" href="{{ route('blog.index') }}">{{ __('blog.nav') }}</a></li>
             @auth
               <li><a class="footer-link" href="{{ route('my.courses') }}">{{ __('ui.nav.my_courses') }}</a></li>
             @endauth

@@ -14,10 +14,16 @@ return [
     // Plateforme principale (cours live) où les comptes élèves sont créés.
     'platform_url' => env('PLATFORM_URL'),
 
+    // Jeton de l'API de statistiques de la plateforme (= MARKETING_API_TOKEN côté plateforme).
+    'platform_stats_token' => env('PLATFORM_STATS_TOKEN'),
+
     // Logo en tête des e-mails (URL publique absolue)
     'mail_logo_url' => env('MAIL_LOGO_URL'),
 
     // Coordonnées affichées aux parents dans les e-mails.
     'contact_phone' => env('CONTACT_PHONE'),
     'contact_email' => env('CONTACT_EMAIL'),
+
+    // Numéro WhatsApp du bouton flottant (format international sans + ni espaces).
+    'whatsapp_number' => preg_replace('/\D+/', '', (string) env('WHATSAPP_NUMBER', '21657029460')),
 ];

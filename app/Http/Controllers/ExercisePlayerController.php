@@ -9,6 +9,8 @@ use App\Models\ExerciseAttemptAnswer;
 use App\Models\ExerciseItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExercisePlayerController extends Controller
 {
@@ -33,6 +35,34 @@ class ExercisePlayerController extends Controller
             ->first();
 
         return view('exercises.show', compact('exercise', 'lastAttempt'));
+    }
+
+    /**
+     * Sert le PDF / l'audio / la vidéo d'un exercice depuis le disque privé, uniquement aux élèves
+     * qui y ont accès (et aux admins pour la prévisualisation). Le lien ne fonctionne pas s'il est partagé.
+     */
+    public function media(Exercise $exercise, string $kind): BinaryFileResponse
+    {
+        $column = ['pdf' => 'pdf_path', 'audio' => 'audio_path', 'video' => 'video_path'][$kind] ?? abort(404);
+
+        if (! auth()->user()?->hasRole('admin')) {
+            $exercise->load(['course', 'packItem.pack']);
+            abort_unless($exercise->is_published, 404);
+            $this->checkAccess($exercise);
+        }
+
+        $path = $exercise->{$column};
+        abort_unless(filled($path), 404);
+
+        // Fichiers envoyés avant le passage au disque privé : encore sur le disque public.
+        $disk = collect(['private', 'public'])->first(fn ($d) => Storage::disk($d)->exists($path));
+        abort_unless($disk, 404);
+
+        return response()->file(Storage::disk($disk)->path($path), [
+            'Content-Disposition' => 'inline; filename="'.$kind.'-'.$exercise->id.'.'.pathinfo($path, PATHINFO_EXTENSION).'"',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Robots-Tag' => 'noindex, nofollow',
+        ]);
     }
 
     public function submit(Request $request, Exercise $exercise)

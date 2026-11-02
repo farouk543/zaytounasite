@@ -10,7 +10,7 @@ class CurrencyService
      * Currencies the store can display and bill in.
      * Every one of these must appear in RATES_FROM_TND and SYMBOLS.
      */
-    public const SUPPORTED = ['TND', 'EUR', 'USD', 'GBP', 'QAR', 'SAR', 'AED', 'MAD'];
+    public const SUPPORTED = ['TND', 'EUR', 'USD', 'CAD', 'GBP', 'QAR', 'SAR', 'AED', 'MAD'];
 
     /**
      * Exchange rates relative to TND (1 TND = X currency).
@@ -18,12 +18,14 @@ class CurrencyService
      * Conversion fallback only — explicit per-market prices (PACK_PRICES /
      * product_prices) always win. Mid-market rates checked 2026-09-01;
      * Gulf values derived from the USD rate via each currency's USD peg
-     * (QAR 3.64, SAR 3.75, AED 3.6725). Refresh periodically.
+     * (QAR 3.64, SAR 3.75, AED 3.6725). CAD added 2026-11-02 (≈ 1.38 CAD
+     * per USD). Refresh periodically.
      */
     public const RATES_FROM_TND = [
         'TND' => 1.00,
         'EUR' => 0.295,
         'USD' => 0.342,
+        'CAD' => 0.472,
         'GBP' => 0.253,
         'QAR' => 1.245,
         'SAR' => 1.283,
@@ -39,6 +41,7 @@ class CurrencyService
         'TND' => 1,
         'EUR' => 1,
         'USD' => 1,
+        'CAD' => 1,
         'GBP' => 1,
         'QAR' => 5,
         'SAR' => 5,
@@ -76,6 +79,7 @@ class CurrencyService
         'TND' => 1.00,
         'EUR' => 2.53,
         'USD' => 2.55,
+        'CAD' => 2.50,
         'GBP' => 2.65,
         'QAR' => 3.00,
         'SAR' => 2.35,
@@ -98,7 +102,7 @@ class CurrencyService
         'PT' => 'EUR',
         'GB' => 'GBP',
         'US' => 'USD',
-        'CA' => 'USD',
+        'CA' => 'CAD',
         'AU' => 'USD',
         'QA' => 'QAR',
         'SA' => 'SAR',
@@ -113,6 +117,7 @@ class CurrencyService
         'TND' => 'DT',
         'EUR' => '€',
         'USD' => '$',
+        'CAD' => 'CA$',
         'GBP' => '£',
         'QAR' => 'QAR',
         'SAR' => 'SAR',

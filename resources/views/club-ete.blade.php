@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="summer-club-visual">
-                    <img src="{{ asset('images/summer_club.png') }}" alt="{{ __('ui.home.summer_club_alt') }}">
+                    <img src="{{ asset('images/summer_club.webp') }}" alt="{{ __('ui.home.summer_club_alt') }}">
                 </div>
             </div>
         </div>

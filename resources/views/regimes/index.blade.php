@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('seo.pages.regimes.title'))
+@section('meta_description', __('seo.pages.regimes.description'))
+
 @section('content')
 @php
     $filterData = [

@@ -6,6 +6,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>@yield('title', config('app.name', 'Zaytouna Academy'))</title>
+  @include('partials.seo')
 
   <!-- Fonts (Style guide: Montserrat + Playfair Display) -->
   <link rel="preconnect" href="https://fonts.bunny.net">
@@ -87,5 +88,8 @@
 
   {{-- IMPORTANT: pour que @push('scripts') fonctionne --}}
   @stack('scripts')
+
+  @include('partials.whatsapp-button')
+  @include('partials.click-tracker')
 </body>
 </html>

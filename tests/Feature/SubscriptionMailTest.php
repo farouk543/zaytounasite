@@ -21,6 +21,7 @@ beforeEach(function () {
 
     $this->admin = User::factory()->create(['email' => 'boss@zaytouna.test']);
     $this->admin->assignRole('admin');
+    $this->admin->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP');
 
     config(['zaytouna.admin_emails' => ['equipe@zaytouna.test']]);
 });

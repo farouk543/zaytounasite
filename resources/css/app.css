@@ -117,6 +117,32 @@
 @media (min-width: 900px){
   .za-navLinks{ display:flex; }
 }
+/* Menu : rien ne passe sur deux lignes ni ne se chevauche, même connecté
+   (Mes cours + Panier + Tableau de bord + langues + devise). */
+.site-header > .za-container{ max-width: 1360px; }
+@media (min-width: 900px){
+  .za-navLinks .nav-link,
+  .za-navActions .btn-ghost,
+  .za-navActions .btn-outline,
+  .za-navActions .btn-primary{ white-space: nowrap; }
+  .za-navActions{ flex-shrink: 0; }
+}
+/* Écrans moyens : trop d'éléments pour une ligne → les liens, langues et devise passent
+   dans le panneau « burger » (qui contient déjà tout), seuls les boutons de compte restent. */
+@media (min-width: 900px) and (max-width: 1365px){
+  .site-header .za-navLinks,
+  .site-header .za-navActions .za-lang{ display: none; }
+  .site-header .za-navActions .za-burger{ display: inline-flex; }
+  .site-header .za-navActions{ gap: 8px; min-width: 0; }
+}
+@media (min-width: 1366px){
+  .site-header .mobile-panel{ display: none !important; }
+}
+/* Téléphone connecté : Panier et Tableau de bord sont dans le panneau burger. */
+@media (max-width: 899px){
+  .site-header .za-navActions > .btn-ghost{ display: none; }
+  .site-header .za-navActions{ min-width: 0; gap: 8px; }
+}
 
 .nav-link{
   font-size: 0.95rem;
@@ -1054,7 +1080,7 @@
   overflow: hidden;
 
   /* ✅ ton image (bon path) */
-  background-image: url('/images/back_tn.png');
+  background-image: url('/images/back_tn.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1199,15 +1225,15 @@
 }
 
 .za-programMedia[data-media="elementary"] {
-    background-image: url('/images/primaire.png');
+    background-image: url('/images/primaire.webp');
 }
 
 .za-programMedia[data-media="middle"] {
-    background-image: url('/images/college.png');
+    background-image: url('/images/college.webp');
 }
 
 .za-programMedia[data-media="high"] {
-    background-image: url('/images/lycee.png');
+    background-image: url('/images/lycee.webp');
 }
 
 .za-programBody {

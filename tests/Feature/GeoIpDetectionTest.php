@@ -51,10 +51,10 @@ it('is a no-op when disabled', function () {
 it('sets the visitor currency from an IP lookup when there is no CDN header', function () {
     Http::fake(['ipwho.is/*' => Http::response(['country_code' => 'FR'])]);
 
-    $this->withServerVariables(['REMOTE_ADDR' => '8.8.8.8'])->get('/_health/geo')
-        ->assertOk()
-        ->assertJsonPath('currency_source', 'géolocalisation')
-        ->assertJsonPath('detected_currency', 'EUR');
+    $this->withServerVariables(['REMOTE_ADDR' => '8.8.8.8'])->get('/')->assertOk();
+
+    expect(session('app_currency'))->toBe('EUR')
+        ->and(session('app_currency_resolved'))->toBeTruthy();
 });
 
 it('lets a manual currency choice win over the IP lookup', function () {
@@ -62,7 +62,8 @@ it('lets a manual currency choice win over the IP lookup', function () {
 
     $this->get('/devise/SAR');
 
-    $this->withServerVariables(['REMOTE_ADDR' => '8.8.8.8'])->get('/_health/geo')
-        ->assertJsonPath('detected_currency', 'SAR')
-        ->assertJsonPath('currency_source', 'manuel (/devise)');
+    $this->withServerVariables(['REMOTE_ADDR' => '8.8.8.8'])->get('/')->assertOk();
+
+    expect(session('app_currency'))->toBe('SAR')
+        ->and(session('app_currency_manual'))->toBeTruthy();
 });

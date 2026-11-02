@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('seo.pages.refunds.title'))
+@section('meta_description', __('seo.pages.refunds.description'))
+
 @section('content')
 
 {{-- ===== HERO ===== --}}

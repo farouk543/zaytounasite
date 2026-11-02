@@ -7,6 +7,7 @@
   $isCatalog = request()->routeIs('catalog') || request()->routeIs('courses.*');
   $isMyCourses = request()->routeIs('my.courses') || request()->routeIs('courses.access') || request()->routeIs('courses.pdf');
   $isPublicSummerClub = request()->routeIs('club.ete');
+  $isBlog = request()->routeIs('blog.*');
   $isStudentSummerClub = request()->routeIs('student.club-ete.*');
   $isCart = request()->routeIs('cart.*') || request()->routeIs('checkout');
 
@@ -41,7 +42,7 @@
       <!-- Left: Brand -->
       <a href="{{ route('home') }}" class="za-brand">
         <img
-          src="{{ asset('images/favicon.png') }}"
+          src="{{ asset('images/favicon.webp') }}"
           alt="Zaytouna Academy Logo"
           class="za-brandLogo"
         />
@@ -63,6 +64,10 @@
 
         <a class="nav-link {{ $isPublicSummerClub ? 'is-active' : '' }}" href="{{ route('club.ete') }}">
           Club d&#8217;&#233;t&#233;
+        </a>
+
+        <a class="nav-link {{ $isBlog ? 'is-active' : '' }}" href="{{ route('blog.index') }}">
+          {{ __('blog.nav') }}
         </a>
 
         @auth
@@ -189,6 +194,10 @@
 
         <a class="mobile-link {{ $isPublicSummerClub ? 'is-active' : '' }}" href="{{ route('club.ete') }}" @click="open=false">
           Club d&#8217;&#233;t&#233;
+        </a>
+
+        <a class="mobile-link {{ $isBlog ? 'is-active' : '' }}" href="{{ route('blog.index') }}" @click="open=false">
+          {{ __('blog.nav') }}
         </a>
 
         @auth

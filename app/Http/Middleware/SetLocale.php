@@ -11,6 +11,16 @@ class SetLocale
 
     public function handle(Request $request, Closure $next)
     {
+        // 0) Langue dans l'URL (?lang=ar) : c'est ce qui permet à Google d'indexer
+        //    chaque version linguistique d'une page (liens hreflang du sitemap).
+        $queryLocale = $request->query('lang');
+        if (is_string($queryLocale) && in_array($queryLocale, $this->available, true)) {
+            session(['locale' => $queryLocale]);
+            app()->setLocale($queryLocale);
+
+            return $next($request);
+        }
+
         // 1) Si user a choisi une langue -> session
         $sessionLocale = session('locale');
         if (is_string($sessionLocale) && in_array($sessionLocale, $this->available, true)) {

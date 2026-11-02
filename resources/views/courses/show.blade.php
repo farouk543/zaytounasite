@@ -1,6 +1,33 @@
 {{-- resources/views/courses/show.blade.php --}}
 @extends('layouts.app')
 
+@php
+  $seoTitle = $course->title_i18n ?: $course->title;
+  $seoDesc = trim(strip_tags($course->description_i18n ?? '')) ?: __('seo.default_description');
+  $seoThumb = $course->thumbnail_path
+    ? \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim(preg_replace('#^public/#', '', $course->thumbnail_path), '/'))
+    : null;
+@endphp
+@section('title', $seoTitle.' | Zaytouna Academy')
+@section('meta_description', $seoDesc)
+@if($seoThumb)
+  @section('meta_image', $seoThumb)
+@endif
+@push('head')
+<script type="application/ld+json">
+{!! json_encode(array_filter([
+  '@context' => 'https://schema.org',
+  '@type' => 'Course',
+  'name' => $seoTitle,
+  'description' => \Illuminate\Support\Str::limit($seoDesc, 300),
+  'url' => route('courses.show', $course),
+  'image' => $seoThumb,
+  'inLanguage' => app()->getLocale(),
+  'provider' => ['@type' => 'EducationalOrganization', 'name' => 'Zaytouna Academy', 'sameAs' => route('home')],
+]), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}
+</script>
+@endpush
+
 @section('content')
   @php
     use Illuminate\Support\Facades\Storage;

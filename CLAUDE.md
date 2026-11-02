@@ -37,8 +37,11 @@ php artisan db:seed
 composer setup
 ```
 
-Seeding creates roles/taxonomy and an admin: `admin@zaytouna.local` / `Admin@12345`.
-Filament admin panel lives at `/admin` (login required, `admin` role only).
+Seeding creates roles/taxonomy; only in `local`/`testing` (and when no admin exists) it adds a dev admin
+`admin@zaytouna.local` / `Admin@12345`. Real admin accounts: `php artisan zaytouna:admin <email> [--replace=old@mail]
+[--demote-others] [--reset-2fa]` (password prompted, never stored in code). Filament admin panel lives at `/admin`
+(`admin` role only, **two-factor authentication required** — authenticator app + recovery codes, `->profile()` page).
+In tests, give admins `$admin->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP')` or `/admin` redirects to MFA setup.
 
 ## Architecture
 
@@ -90,7 +93,7 @@ admins (`ManualOrderPending`). An admin then approves the order in Filament, whi
 ### Regimes (live tutoring)
 `RegimeController` handles four programs: `tunisia`, `qatar`, `saudi`, `quran`. Each has
 `show` / `start` / `checkout` / `submit` routes under `/regimes/*`. Pricing (hourly rates, pack
-prices, native currency per regime) is hard-coded in `App\Services\CurrencyService` constants.
+prices, native currency per regime) is hard-coded in `App\Services\CurrencyService` constants (CAD added for Canada: derived from TND via PPP like USD/GBP).
 
 ### Club d'été (Summer Club) — a self-contained parallel subsystem
 Prefix `SummerClub*` on ~10 models, Filament resources, and student routes under
@@ -100,6 +103,49 @@ items + `SummerClubExerciseAttempt`), `SummerClubEnrollment`, and a public lead 
 `SummerClubSubscriptionRequest` (`POST /club-ete/subscription-request`). Treat it as separate from
 the main course engine — do not assume shared tables. "Club islamique" (`/club-islamique`) is just a
 static Blade view.
+
+### Blog, SEO & site analytics (Filament group "Marketing & Blog")
+- **Blog**: `BlogPost` / `BlogCategory` (FR required, `_ar` / `_en` optional; `localized()`,
+  `availableLocales()`). Content is Filament `RichEditor` HTML rendered via `contentHtml()`.
+  Routes `/blog`, `/blog/categorie/{slug}`, `/blog/{slug}` (`BlogController`). Drafts and future-dated posts
+  404 except for admins (preview). `App\Services\Blog\ArticleRenderer` post-processes the editor HTML: H2 anchors +
+  table of contents, a "Questions fréquentes" H2 (then H3/answer pairs) becomes an accordion + FAQPage JSON-LD,
+  blockquote = "À retenir" callout, mid-article CTA, and strips the `nofollow`/`target` RichEditor adds to internal
+  links. Write articles with only p/h2/h3/ul/ol/blockquote/table/a — the RichEditor drops `div`s and attributes.
+- **Priority markets** (« pays de vision »): TN, FR, SA, QA, CA in `config/marketing.php` (+ `App\Support\Markets`,
+  flags as SVG in `public/images/flags`). Used for blog `target_countries`, regional hreflang
+  (`App\Support\Hreflang`: fr-TN, fr-CA, ar-SA…), the blog's « pour votre pays » block and analytics.
+- **Marketing goals**: `MarketingGoal` (month AAAA-MM, metric, optional country, target) managed at
+  `/admin/objectifs`; `GoalTracker` computes actuals, month-end projection, a /100 strategy score and
+  rule-based recommendations shown on `/admin/statistiques`. Dates use `marketing.timezone` (Africa/Tunis).
+- **Platform stats**: `PlatformStats` calls the teaching platform's `GET {PLATFORM_URL}/api/marketing/stats?month=`
+  (Bearer `PLATFORM_STATS_TOKEN` = platform's `MARKETING_API_TOKEN`), aggregated only. Feeds goal metrics
+  `active_students` (per country, from timezone, no projection), `retention`, `attendance` and the « Plateforme » block
+  of `/admin/statistiques`; API down → goals « Indisponible » (not scored).
+  Reverse direction: `GET /api/site/stats?period=&month=` (`routes/api.php`, `Api\SiteStatsController`, same Bearer token)
+  feeds the platform's admin page « Site principal » — field whitelist only, never names/e-mails/visitor hashes.
+- **Security**: `SecurityHeaders` (safe CSP: frame-ancestors/base-uri/object-src/form-action, no X-Powered-By). Paid
+  exercise PDF/audio/video live on the `private` disk, served by `exercise.media` (access-checked, admins allowed).
+- **Conversion tools**: floating WhatsApp button (`partials/whatsapp-button`, number `WHATSAPP_NUMBER` →
+  `config('zaytouna.whatsapp_number')`, hide with `$hideWhatsapp = true`); clicks to `wa.me/<number>` feed the
+  `whatsapp` goal metric. Parent reviews: `Testimonial` (`/admin/temoignages`, public form `/avis` → unpublished +
+  admin notification), shown by `partials/testimonials` on regime pages + home only once published, with
+  Course/AggregateRating JSON-LD from 3 reviews. Never seed or invent reviews.
+- **Seeded articles**: `BlogArticlesSeeder` (11 scheduled posts, content in `database/seeders/content/blog/<slug>/
+  {fr,ar,en}.html`, covers in `database/seeders/assets/blog/`). Idempotent: never overwrites an existing slug.
+  In production run `php artisan db:seed --class=MarketingSeeder --force` (categories + articles + launch goals).
+- **SEO head**: every page using `layouts.app` includes `partials/seo` (description, canonical, hreflang,
+  OG/Twitter, JSON-LD). Views override via `@section('title'|'meta_description'|'meta_image'|'hreflang'|
+  'canonical'|'robots')` and `@push('head')`. Section values must never be `null` (Blade would open an
+  unclosed buffer). Titles/descriptions live in `lang/*/seo.php`.
+- **Language in URL**: `SetLocale` honours `?lang=fr|en|ar` (stored in session) — this is what hreflang
+  alternates point to. `/sitemap.xml` and `/robots.txt` are dynamic (`SeoController`, `SitemapBuilder`);
+  robots disallows everything outside production. Don't recreate `public/robots.txt` (it would shadow the route).
+- **Analytics (no cookies, no IP stored)**: `TrackPageView` middleware (web group) writes `page_views` for
+  human GET HTML 200 responses, skipping bots, admins and `/admin`. `partials/click-tracker` beacons clicks
+  to `POST /t/c` → `click_events` (name a button with `data-track="…"`, opt out with `data-no-track`).
+  `visitor_hash` = sha256(app key + month + IP + UA). Reports: `AnalyticsReport` →
+  `Filament\Pages\SiteAnalytics` (`/admin/statistiques`). Rows pruned after 25 months (`model:prune`, daily).
 
 ### i18n & currency (middleware, appended to the `web` group in `bootstrap/app.php`)
 - `SetLocale` — resolves locale from `session('locale')`, else `Accept-Language`, else

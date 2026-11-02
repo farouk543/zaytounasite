@@ -1,5 +1,7 @@
         @extends('layouts.app')
 
+        @section('title', __('seo.home_title'))
+
         @section('content')
 <style>
     .za-heroFloatWrap{
@@ -228,7 +230,7 @@
     .za-leisureBg{
         position: absolute;
         inset: 0;
-        background-image: url('/images/loisir.png');
+        background-image: url('{{ asset('images/loisir.webp') }}');
         background-size: cover;
         background-position: center center;
         background-repeat: no-repeat;
@@ -257,41 +259,6 @@
         z-index: 1;
     }
 
-    .za-summerHeroLink{
-        border-color: rgba(212,176,86,.62);
-        background: rgba(212,176,86,.12);
-        color: rgba(255,255,255,.96);
-        box-shadow: 0 12px 34px rgba(0,0,0,.18);
-    }
-
-    .za-summerHeroLink:hover{
-        border-color: rgba(212,176,86,.88);
-        background: rgba(212,176,86,.20);
-        color: #fff;
-    }
-
-    .activities-card--summer{
-        position: relative;
-        border-color: rgba(212,176,86,.42);
-        box-shadow:
-            0 28px 76px rgba(0,0,0,.25),
-            0 0 0 1px rgba(212,176,86,.12);
-    }
-
-    .activities-card--summer::before{
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(135deg, rgba(212,176,86,.18), transparent 36%);
-        z-index: 1;
-    }
-
-    .activities-card--summer > *{
-        position: relative;
-        z-index: 2;
-    }
-
     .activities-badgeRow{
         display: flex;
         align-items: center;
@@ -311,12 +278,6 @@
         font-size: .78rem;
         font-weight: 900;
         box-shadow: 0 10px 24px rgba(212,176,86,.24);
-    }
-
-    .activities-card--summer .btn-dark{
-        background: linear-gradient(135deg, #0b3b2e, #052e1f);
-        border-color: rgba(212,176,86,.36);
-        box-shadow: 0 14px 28px rgba(5,46,31,.22);
     }
 
     .activities-card--islamic{
@@ -579,7 +540,7 @@
    aria-label="Cours live">
     <span class="za-iconGlow"></span>
     <span class="za-iconOrbit"></span>
-    <img src="{{ asset('images/live_icon.png') }}" alt="">
+    <img src="{{ asset('images/live_icon.webp') }}" alt="">
 </a>
 
                 <div class="za-heroCard" data-reveal>
@@ -601,9 +562,6 @@
                             <a class="btn-primary za-btnLg" href="{{ route('register') }}">{{ __('ui.nav.get_started') }}</a>
                             <a class="btn-outline za-btnLg" href="{{ route('login') }}">{{ __('ui.nav.login') }}</a>
                         @endauth
-                        <a class="btn-outline za-btnLg za-summerHeroLink" href="{{ route('club.ete') }}">
-                            D&#233;couvrir le Club d&#8217;&#233;t&#233;
-                        </a>
                     </div>
 
                     <div class="za-heroStats">
@@ -627,100 +585,11 @@
    aria-label="Cours enregistrés">
     <span class="za-iconGlow"></span>
     <span class="za-iconOrbit"></span>
-    <img src="{{ asset('images/cour_icon.png') }}" alt="">
+    <img src="{{ asset('images/cour_icon.webp') }}" alt="">
 </a>
             </div>
         </div>
     </section>
-
- <section class="za-section za-leisureSection" data-reveal>
-    <div class="za-leisureBg"></div>
-    <div class="za-leisureOverlay"></div>
-
-    <div class="za-container" style="position: relative; z-index: 2;">
-        <div class="za-sectionHead" data-reveal>
-            <div class="pill">{{ __('ui.home.leisure_pill') }}</div>
-            <h2 class="za-h2" style="color: #fff;">{{ __('ui.home.activities_title') }}</h2>
-            <p class="za-muted" style="color: rgba(255,255,255,.82);">
-                {{ __('ui.home.activities_text') }}
-            </p>
-        </div>
-
-        <div class="activities-grid">
-            <div class="za-programCard activities-card" data-reveal="delay-1">
-                <div class="activities-media">
-                    <img src="{{ asset('images/echec.png') }}" alt="{{ __('ui.home.chess_title') }} Zaytouna Academy" loading="lazy">
-                </div>
-
-                <div class="activities-body">
-                    <span class="activities-badge">{{ __('ui.home.chess_badge') }}</span>
-                    <h3 class="activities-title">{{ __('ui.home.chess_title') }}</h3>
-                    <p class="activities-text">
-                        {{ __('ui.home.chess_text_updated') }}
-                    </p>
-
-                    <div class="za-cardCta mt-4">
-                        <button
-                            type="button"
-                            class="btn-dark za-btnLg"
-                            onclick="openChessModal()"
-                            aria-haspopup="dialog"
-                            aria-controls="chessModal"
-                        >
-                            {{ __('ui.home.chess_cta') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="za-programCard activities-card activities-card--summer" data-reveal="delay-2">
-                <div class="activities-media">
-                    <img src="{{ asset('images/summer_club.png') }}" alt="{{ __('ui.home.summer_club_alt') }}" loading="lazy">
-                </div>
-
-                <div class="activities-body">
-                    <div class="activities-badgeRow">
-                        <span class="activities-badge">{{ __('ui.home.summer_club_badge') }}</span>
-                        <span class="activities-seasonBadge">&#201;t&#233; 2026</span>
-                    </div>
-                    <h3 class="activities-title">{{ __('ui.home.summer_club_title') }}</h3>
-                    <p class="activities-text">
-                        {{ __('ui.home.summer_club_text') }}
-                    </p>
-
-                    <div class="za-cardCta mt-4">
-                        <a class="btn-dark za-btnLg" href="{{ route('club.ete') }}">
-                            {{ __('ui.home.summer_club_cta') }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="za-programCard activities-card activities-card--islamic" data-reveal="delay-3">
-                <div class="activities-media">
-                    <img src="{{ asset('images/clubs/club-islamique-session-ete.jpeg') }}" alt="Club Islamique - Session Ete Arabe et Coran Zaytouna Academy" loading="lazy">
-                </div>
-
-                <div class="activities-body">
-                    <div class="activities-badgeRow">
-                        <span class="activities-badge">Session &#201;t&#233;</span>
-                        <span class="activities-seasonBadge">Arabe &amp; Coran</span>
-                    </div>
-                    <h3 class="activities-title">Club Islamique</h3>
-                    <p class="activities-text">
-                        Un programme estival en ligne pour apprendre l&#8217;Arabe, le Coran et les valeurs islamiques avec un suivi personnalis&#233;.
-                    </p>
-
-                    <div class="za-cardCta mt-4">
-                        <a class="btn-dark za-btnLg" href="{{ route('club.islamique') }}">
-                            D&#233;couvrir le programme
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
     <!-- SECTION: 3 cards -->
     <section class="za-section" data-reveal>
@@ -879,10 +748,10 @@
         <div class="za-tracksGrid">
             @php
               $homeTracks = [
-                ['route' => route('regimes.tunisia.show'), 'img' => asset('images/tunisie.png'),  'name' => __('ui.home.track_tunisia'), 'text' => __('ui.home.track_tunisia_text')],
-                ['route' => route('regimes.france.show'),  'img' => asset('images/france.jpg'),    'name' => __('ui.home.track_france'),  'text' => __('ui.home.track_france_text')],
-                ['route' => route('regimes.qatar.show'),   'img' => asset('images/qatar.png'),     'name' => __('ui.home.track_qatar'),   'text' => __('ui.home.track_qatar_text')],
-                ['route' => route('regimes.quran.show'),   'img' => asset('images/Quran.png'),     'name' => __('ui.home.track_quran'),   'text' => __('ui.home.track_quran_text')],
+                ['route' => route('regimes.tunisia.show'), 'img' => asset('images/tunisie.webp'),  'name' => __('ui.home.track_tunisia'), 'text' => __('ui.home.track_tunisia_text')],
+                ['route' => route('regimes.france.show'),  'img' => asset('images/france.webp'),    'name' => __('ui.home.track_france'),  'text' => __('ui.home.track_france_text')],
+                ['route' => route('regimes.qatar.show'),   'img' => asset('images/qatar.webp'),     'name' => __('ui.home.track_qatar'),   'text' => __('ui.home.track_qatar_text')],
+                ['route' => route('regimes.quran.show'),   'img' => asset('images/Quran.webp'),     'name' => __('ui.home.track_quran'),   'text' => __('ui.home.track_quran_text')],
               ];
             @endphp
 
@@ -950,7 +819,96 @@
     </section>
 
 
+ <section class="za-section za-leisureSection" data-reveal>
+    <div class="za-leisureBg"></div>
+    <div class="za-leisureOverlay"></div>
+
+    <div class="za-container" style="position: relative; z-index: 2;">
+        <div class="za-sectionHead" data-reveal>
+            <div class="pill">{{ __('ui.home.leisure_pill') }}</div>
+            <h2 class="za-h2" style="color: #fff;">{{ __('ui.home.activities_title') }}</h2>
+            <p class="za-muted" style="color: rgba(255,255,255,.82);">
+                {{ __('ui.home.activities_text') }}
+            </p>
+        </div>
+
+        <div class="activities-grid">
+            <div class="za-programCard activities-card" data-reveal="delay-1">
+                <div class="activities-media">
+                    <img src="{{ asset('images/echec.webp') }}" alt="{{ __('ui.home.chess_title') }} Zaytouna Academy" loading="lazy">
+                </div>
+
+                <div class="activities-body">
+                    <span class="activities-badge">{{ __('ui.home.chess_badge') }}</span>
+                    <h3 class="activities-title">{{ __('ui.home.chess_title') }}</h3>
+                    <p class="activities-text">
+                        {{ __('ui.home.chess_text_updated') }}
+                    </p>
+
+                    <div class="za-cardCta mt-4">
+                        <button
+                            type="button"
+                            class="btn-dark za-btnLg"
+                            onclick="openChessModal()"
+                            aria-haspopup="dialog"
+                            aria-controls="chessModal"
+                        >
+                            {{ __('ui.home.chess_cta') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="za-programCard activities-card" data-reveal="delay-2">
+                <div class="activities-media">
+                    <img src="{{ asset('images/summer_club.webp') }}" alt="{{ __('ui.home.summer_club_alt') }}" loading="lazy">
+                </div>
+
+                <div class="activities-body">
+                    <span class="activities-badge">{{ __('ui.home.summer_club_badge') }}</span>
+                    <h3 class="activities-title">{{ __('ui.home.summer_club_title') }}</h3>
+                    <p class="activities-text">
+                        {{ __('ui.home.summer_club_text') }}
+                    </p>
+
+                    <div class="za-cardCta mt-4">
+                        <a class="btn-dark za-btnLg" href="{{ route('club.ete') }}">
+                            {{ __('ui.home.summer_club_cta') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="za-programCard activities-card activities-card--islamic" data-reveal="delay-3">
+                <div class="activities-media">
+                    <img src="{{ asset('images/clubs/club-islamique-session-ete.jpeg') }}" alt="Club Islamique - Session Ete Arabe et Coran Zaytouna Academy" loading="lazy">
+                </div>
+
+                <div class="activities-body">
+                    <div class="activities-badgeRow">
+                        <span class="activities-badge">Session &#201;t&#233;</span>
+                        <span class="activities-seasonBadge">Arabe &amp; Coran</span>
+                    </div>
+                    <h3 class="activities-title">Club Islamique</h3>
+                    <p class="activities-text">
+                        Un programme estival en ligne pour apprendre l&#8217;Arabe, le Coran et les valeurs islamiques avec un suivi personnalis&#233;.
+                    </p>
+
+                    <div class="za-cardCta mt-4">
+                        <a class="btn-dark za-btnLg" href="{{ route('club.islamique') }}">
+                            D&#233;couvrir le programme
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
     <!-- CTA -->
+    {{-- Avis de parents (n'apparaît qu'une fois des avis publiés) --}}
+    @include('partials.testimonials', ['program' => null])
+
     <section class="za-section za-cta" data-reveal>
         <div class="za-container">
             <div class="cta-card" data-reveal>

@@ -96,7 +96,7 @@
                 preload="metadata"
                 class="za-exVideo"
               >
-                <source src="{{ Storage::disk('public')->url($exercise->video_path) }}" type="video/mp4">
+                <source src="{{ route('exercise.media', ['exercise' => $exercise, 'kind' => 'video']) }}" type="video/mp4">
                 Votre navigateur ne supporte pas la vidéo.
               </video>
             </div>
@@ -117,7 +117,7 @@
                 preload="metadata"
                 class="za-exAudio"
               >
-                <source src="{{ Storage::disk('public')->url($exercise->audio_path) }}">
+                <source src="{{ route('exercise.media', ['exercise' => $exercise, 'kind' => 'audio']) }}">
                 Votre navigateur ne supporte pas l’audio.
               </audio>
             </div>
@@ -134,7 +134,7 @@
 
               <div class="za-exPdfWrap">
                 <embed
-                  src="{{ Storage::disk('public')->url($exercise->pdf_path) }}#toolbar=1&navpanes=0&view=FitH"
+                  src="{{ route('exercise.media', ['exercise' => $exercise, 'kind' => 'pdf']) }}#toolbar=1&navpanes=0&view=FitH"
                   type="application/pdf"
                   class="za-exPdf"
                 />

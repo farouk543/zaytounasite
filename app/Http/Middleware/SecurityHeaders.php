@@ -27,6 +27,18 @@ class SecurityHeaders
         // Disable browser features that are not needed
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
+        // Content-Security-Policy « sûre » : ne touche pas aux scripts/styles (Alpine, Livewire, inline),
+        // mais interdit l'intégration du site ailleurs, les plugins, le détournement de <base>
+        // et l'envoi de formulaires vers un autre site.
+        $response->headers->set('Content-Security-Policy',
+            "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'");
+
+        // Ne pas annoncer la version de PHP.
+        $response->headers->remove('X-Powered-By');
+        if (! headers_sent()) {
+            header_remove('X-Powered-By');
+        }
+
         // Force HTTPS (only in production to avoid local dev issues)
         if (app()->isProduction()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

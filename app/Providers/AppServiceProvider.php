@@ -24,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Fichiers publics (couvertures, vignettes…) servis depuis l'adresse réellement utilisée
+        // (sous-dossier compris) plutôt que depuis APP_URL, qui peut différer en local.
+        if (! $this->app->runningInConsole()) {
+            config(['filesystems.disks.public.url' => rtrim(request()->root(), '/').'/storage']);
+        }
+
         Event::listen(Registered::class, function ($event) {
             $user = $event->user;
 

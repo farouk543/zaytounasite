@@ -1041,4 +1041,9 @@ return [
     'back_to_course'       => '← Back to course',
     'restart'              => '🔄 Restart',
   ],
+  'whatsapp' => [
+    'label'   => 'Questions? Chat with us',
+    'aria'    => 'Contact us on WhatsApp',
+    'message' => 'Hello Zaytouna Academy 👋 I would like some information. (Page: :page)',
+  ],
 ];

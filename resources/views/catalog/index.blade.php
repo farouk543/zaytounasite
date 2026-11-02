@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('seo.catalog_title'))
+@section('meta_description', __('seo.catalog_description'))
+
 @section('content')
   @php
     use Illuminate\Support\Facades\Route;
@@ -25,7 +28,7 @@
   @endphp
 
   <div class="za-catalogPage">
-    <div class="za-catalogBg" style="background-image: url('{{ asset('images/catalog2.jpeg') }}');"></div>
+    <div class="za-catalogBg" style="background-image: url('{{ asset('images/catalog2.webp') }}');"></div>
     <div class="za-catalogOverlay"></div>
 
     <x-container class="py-10 relative z-10">

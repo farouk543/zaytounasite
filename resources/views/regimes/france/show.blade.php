@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('seo.pages.france.title'))
+@section('meta_description', __('seo.pages.france.description'))
+
 @section('content')
 @php
   $levelsArr = ($levels ?? collect())->map(function($l){
@@ -552,6 +555,8 @@
     <input type="hidden" name="items" x-ref="itemsInput">
   </form>
 </section>
+
+@include('partials.testimonials', ['program' => 'france'])
 @endsection
 
 @push('scripts')

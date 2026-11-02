@@ -41,13 +41,10 @@ class ExerciseForm
 
                     Forms\Components\FileUpload::make('pdf_path')
                         ->label('Fichier PDF')
-                        ->disk('public')
+                        ->disk('private') // fichier payant : servi uniquement aux élèves autorisés
                         ->directory('exercises/pdf')
-                        ->visibility('public')
                         ->acceptedFileTypes(['application/pdf'])
                         ->maxSize(20480)
-                        ->downloadable()
-                        ->openable()
                         ->previewable(false)
                         ->visible(fn ($get) => $get('exercise_type') === 'pdf')
                         ->required(fn ($get) => $get('exercise_type') === 'pdf')
@@ -55,9 +52,8 @@ class ExerciseForm
 
                     Forms\Components\FileUpload::make('audio_path')
                         ->label('Fichier audio')
-                        ->disk('public')
+                        ->disk('private') // fichier payant : servi uniquement aux élèves autorisés
                         ->directory('exercises/audios')
-                        ->visibility('public')
                         ->acceptedFileTypes([
                             'audio/mpeg',
                             'audio/mp3',
@@ -69,29 +65,26 @@ class ExerciseForm
                         ])
                         ->maxSize(20480)
                         ->downloadable(false)
-                        ->openable()
                         ->visible(fn ($get) => $get('exercise_type') === 'audio_interactive')
                         ->required(fn ($get) => $get('exercise_type') === 'audio_interactive')
                         ->helperText('Audio uniquement : MP3, WAV, OGG, WEBM, M4A ou AAC. 20 Mo max.'),
 
                     Forms\Components\FileUpload::make('video_path')
                         ->label('Vidéo MP4')
-                        ->disk('public')
+                        ->disk('private') // fichier payant : servi uniquement aux élèves autorisés
                         ->directory('exercises/videos')
-                        ->visibility('public')
                         ->acceptedFileTypes([
                             'video/mp4',
                         ])
                         ->maxSize(102400)
                         ->downloadable(false)
-                        ->openable()
                         ->visible(fn ($get) => $get('exercise_type') === 'video_interactive')
                         ->required(fn ($get) => $get('exercise_type') === 'video_interactive')
                         ->helperText('Vidéo MP4 avec audio. 100 Mo max.'),
 
                     Forms\Components\Placeholder::make('pdf_preview')
                         ->label('Prévisualisation PDF')
-                        ->content(function ($get) {
+                        ->content(function ($get, $record) {
                             $state = $get('pdf_path');
 
                             if (empty($state)) {
@@ -110,14 +103,18 @@ class ExerciseForm
                                 }
 
                                 if (is_string($file)) {
-                                    $url = Storage::disk('public')->url($file);
+                                    $url = self::resolveTemporaryOrStoredFileUrl($file, $record, 'pdf');
                                 } else {
                                     return new HtmlString('<p style="color:#ef4444;font-size:.85rem;">Impossible de prévisualiser ce PDF avant l’enregistrement.</p>');
                                 }
                             } elseif (is_string($state)) {
-                                $url = Storage::disk('public')->url($state);
+                                $url = self::resolveTemporaryOrStoredFileUrl($state, $record, 'pdf');
                             } else {
                                 return new HtmlString('<p style="color:#ef4444;font-size:.85rem;">Format PDF non reconnu.</p>');
+                            }
+
+                            if (! $url) {
+                                return new HtmlString('<p style="color:rgba(100,116,139,1);font-size:.85rem;">Le PDF sera prévisualisé ici après enregistrement.</p>');
                             }
 
                             return new HtmlString(
@@ -132,14 +129,14 @@ class ExerciseForm
 
                     Forms\Components\Placeholder::make('audio_preview')
                         ->label('Prévisualisation audio')
-                        ->content(function ($get) {
+                        ->content(function ($get, $record) {
                             $state = $get('audio_path');
 
                             if (empty($state)) {
                                 return new HtmlString('<p style="color:rgba(100,116,139,1);font-size:.85rem;">L’audio sera prévisualisé ici après sélection ou enregistrement.</p>');
                             }
 
-                            $url = self::resolveTemporaryOrStoredFileUrl($state);
+                            $url = self::resolveTemporaryOrStoredFileUrl($state, $record, 'audio');
 
                             if (! $url) {
                                 return new HtmlString('<p style="color:#ef4444;font-size:.85rem;">Impossible de prévisualiser cet audio avant l’enregistrement.</p>');
@@ -159,14 +156,14 @@ class ExerciseForm
 
                     Forms\Components\Placeholder::make('video_preview')
                         ->label('Prévisualisation vidéo')
-                        ->content(function ($get) {
+                        ->content(function ($get, $record) {
                             $state = $get('video_path');
 
                             if (empty($state)) {
                                 return new HtmlString('<p style="color:rgba(100,116,139,1);font-size:.85rem;">La vidéo sera prévisualisée ici après sélection ou enregistrement.</p>');
                             }
 
-                            $url = self::resolveTemporaryOrStoredFileUrl($state);
+                            $url = self::resolveTemporaryOrStoredFileUrl($state, $record, 'video');
 
                             if (! $url) {
                                 return new HtmlString('<p style="color:#ef4444;font-size:.85rem;">Impossible de prévisualiser cette vidéo avant l’enregistrement.</p>');
@@ -326,28 +323,22 @@ class ExerciseForm
         ]);
     }
 
-    private static function resolveTemporaryOrStoredFileUrl(mixed $state): ?string
+    /**
+     * URL de prévisualisation : fichier en cours d'envoi, ou fichier enregistré (disque privé)
+     * servi par la route protégée exercise.media.
+     */
+    private static function resolveTemporaryOrStoredFileUrl(mixed $state, mixed $record = null, string $kind = 'pdf'): ?string
     {
+        if (is_array($state)) {
+            $state = collect($state)->first();
+        }
+
         if ($state instanceof TemporaryUploadedFile) {
             return $state->temporaryUrl();
         }
 
-        if (is_array($state)) {
-            $file = collect($state)->first();
-
-            if ($file instanceof TemporaryUploadedFile) {
-                return $file->temporaryUrl();
-            }
-
-            if (is_string($file)) {
-                return Storage::disk('public')->url($file);
-            }
-
-            return null;
-        }
-
-        if (is_string($state)) {
-            return Storage::disk('public')->url($state);
+        if (is_string($state) && $record?->getKey()) {
+            return route('exercise.media', ['exercise' => $record, 'kind' => $kind]);
         }
 
         return null;
