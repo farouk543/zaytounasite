@@ -132,13 +132,10 @@ it('lets admins manage testimonials in the back-office', function () {
     $this->actingAs($admin)->get('/admin/temoignages')->assertOk()->assertSee('Leïla M.');
 });
 
-it('forces admins to set up two-factor authentication before using the back-office', function () {
+it('lets admins use the back-office without two-factor authentication', function () {
     Role::findOrCreate('admin');
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
-    $this->actingAs($admin)->get('/admin/temoignages')->assertRedirect();
-
-    $admin->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP');
-    $this->actingAs($admin->fresh())->get('/admin/temoignages')->assertOk();
+    $this->actingAs($admin)->get('/admin/temoignages')->assertOk();
 });

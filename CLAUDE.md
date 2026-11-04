@@ -40,8 +40,8 @@ composer setup
 Seeding creates roles/taxonomy; only in `local`/`testing` (and when no admin exists) it adds a dev admin
 `admin@zaytouna.local` / `Admin@12345`. Real admin accounts: `php artisan zaytouna:admin <email> [--replace=old@mail]
 [--demote-others] [--reset-2fa]` (password prompted, never stored in code). Filament admin panel lives at `/admin`
-(`admin` role only, **two-factor authentication required** — authenticator app + recovery codes, `->profile()` page).
-In tests, give admins `$admin->saveAppAuthenticationSecret('JBSWY3DPEHPK3PXP')` or `/admin` redirects to MFA setup.
+(`admin` role only, `->profile()` page). Two-factor authentication is **temporarily disabled**: the
+`->multiFactorAuthentication()` call is commented out in `AdminPanelProvider`; the `User` traits and secret columns are kept for re-enabling.
 
 ## Architecture
 

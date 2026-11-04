@@ -76,7 +76,6 @@ class ManageAdminAccount extends Command
         }
 
         $this->info("Compte administrateur prêt : {$email}");
-        $this->line('À la prochaine connexion sur /admin, la double authentification sera demandée (application Google Authenticator, Microsoft Authenticator…).');
 
         return self::SUCCESS;
     }

@@ -7,7 +7,6 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
-use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -30,12 +29,12 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            // Profil (mot de passe, double authentification) + double authentification obligatoire.
             ->profile()
-            ->multiFactorAuthentication(
-                [AppAuthentication::make()->brandName('Zaytouna Academy')->recoverable()],
-                isRequired: true,
-            )
+            // Double authentification désactivée pour le moment. Pour la réactiver :
+            // ->multiFactorAuthentication(
+            //     [\Filament\Auth\MultiFactor\App\AppAuthentication::make()->brandName('Zaytouna Academy')->recoverable()],
+            //     isRequired: true,
+            // )
             ->colors([
                 'primary' => Color::Amber,
             ])
