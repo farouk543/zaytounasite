@@ -3492,6 +3492,30 @@ html {
   .za-navRow { gap: 8px; }
 }
 
+/* ── En-tête téléphone : logo + « Se connecter » + « Commencer » + burger sur une ligne,
+      sans chevauchement (les min-width desktop 210px + 260px dépassent la largeur d'un téléphone). ── */
+@media (max-width: 640px) {
+  .za-brand { min-width: 0; flex-shrink: 0; gap: 8px; }
+  .za-brandLogo { height: 36px; }
+  .za-navActions { min-width: 0; flex: 1 1 auto; gap: 6px; }
+  .za-navActions .btn-outline,
+  .za-navActions .btn-primary {
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  .za-burger { padding: 9px; flex-shrink: 0; }
+}
+/* Texte « Zaytouna Academy » masqué quand la place manque (le logo reste). */
+@media (max-width: 480px) {
+  .za-brandText { display: none; }
+}
+/* Très petits écrans : « Se connecter » reste accessible dans le panneau burger. */
+@media (max-width: 359px) {
+  .za-navActions > .btn-outline { display: none; }
+}
+
 /* ── Catalog filter form ── */
 .za-filterCard {
   overflow-x: visible;
