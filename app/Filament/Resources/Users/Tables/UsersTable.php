@@ -36,11 +36,12 @@ class UsersTable
                     ->toggleable(),
 
                 // Date d'inscription, à l'heure de Tunis : la même que celle de l'alerte « Nouvel inscrit ».
+                // Volontairement NON masquable : Filament garde en session les colonnes masquées, et
+                // l'ancienne colonne « Créé le » (masquée par défaut) resterait cachée chez les admins.
                 Tables\Columns\TextColumn::make('created_at')
                     ->label("Date d'inscription")
                     ->dateTime('d/m/Y H:i', config('marketing.timezone'))
-                    ->sortable()
-                    ->toggleable(),
+                    ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
 
