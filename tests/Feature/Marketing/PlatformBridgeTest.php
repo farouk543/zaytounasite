@@ -49,6 +49,21 @@ it('relays admin alerts to the platform without personal data', function () {
         && ! str_contains(json_encode($r->data()), 'Secret'));
 });
 
+it('sends the admin page of a new registrant so the platform alert opens it', function () {
+    Http::fake(['plateforme.test/*' => Http::response(['notified' => 1])]);
+    $this->withoutDefer();
+
+    $newUser = User::factory()->create(['name' => 'Karim Secret', 'email' => 'karim@example.com']);
+    AdminNotifier::send(new \App\Notifications\NewUserRegistered($newUser));
+
+    Http::assertSent(fn (Request $r) => $r->url() === 'https://plateforme.test/api/site/events'
+        && $r['type'] === 'new_user'
+        && $r['title'] === 'Nouvel inscrit sur le site'
+        && $r['path'] === '/admin/users/'.$newUser->id.'/edit'
+        && ! str_contains(json_encode($r->data()), 'Secret')
+        && ! str_contains(json_encode($r->data()), 'karim@'));
+});
+
 it('does not call the platform when the bridge is not configured', function () {
     config(['zaytouna.platform_stats_token' => null]);
     Http::fake();
