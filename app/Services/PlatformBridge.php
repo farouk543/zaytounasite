@@ -43,7 +43,7 @@ class PlatformBridge
 
     /**
      * Relaie une notification admin du site vers la plateforme, SANS donnée personnelle :
-     * type + titre « sûr » (jamais le nom, l'e-mail ou le message du parent).
+     * type + titre « sûr » (jamais le nom, l'e-mail ou le message du parent) + chemin de la page admin à ouvrir.
      */
     public function pushNotification(array $data): void
     {
@@ -60,12 +60,18 @@ class PlatformBridge
             default => (string) ($data['title'] ?? 'Nouvelle activité'),
         };
 
+        // Page du back-office qui détaille l'alerte (ex. « /admin/users/42/edit » pour un nouvel inscrit) :
+        // la plateforme l'ouvre au clic, en la préfixant par l'adresse du site. Seul un identifiant passe.
+        $path = (string) ($data['url'] ?? '');
+        $path = preg_match('#^/admin(/[A-Za-z0-9_-]+)*$#', $path) ? $path : null;
+
         try {
-            $this->http(4)->post('/events', [
+            $this->http(4)->post('/events', array_filter([
                 'type' => $type,
                 'icon' => mb_substr((string) ($data['icon'] ?? '🌐'), 0, 8),
                 'title' => mb_substr($title, 0, 160),
-            ]);
+                'path' => $path,
+            ]));
         } catch (Throwable $e) {
             report($e);
         }
