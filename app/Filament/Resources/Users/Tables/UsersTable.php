@@ -35,11 +35,12 @@ class UsersTable
                     ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : ($state ?? '—'))
                     ->toggleable(),
 
+                // Date d'inscription, à l'heure de Tunis : la même que celle de l'alerte « Nouvel inscrit ».
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Créé le')
-                    ->dateTime('Y-m-d H:i')
+                    ->label("Date d'inscription")
+                    ->dateTime('d/m/Y H:i', config('marketing.timezone'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')
 
