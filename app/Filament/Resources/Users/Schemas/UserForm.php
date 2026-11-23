@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Hash;
@@ -42,6 +43,12 @@ class UserForm
                         ->default(['student'])              // ✅ par défaut, un compte créé = student
                         ->helperText("Par défaut: student pour les inscriptions publiques.")
                         ->visible(fn () => auth()->user()?->hasRole('admin') ?? false),
+
+                    // Lecture seule, sur la fiche d'un compte existant (page ouverte par l'alerte « Nouvel inscrit »).
+                    TextEntry::make('created_at')
+                        ->label("Date d'inscription")
+                        ->dateTime('d/m/Y à H:i', config('marketing.timezone'))
+                        ->visibleOn('edit'),
                 ]),
         ]);
     }
